@@ -1,0 +1,4 @@
+.vscode/
+obj/
+sim.out
+rom_emu.bin
