@@ -1,4 +1,4 @@
-SRCDIR = src_new
+SRCDIR = src
 OBJDIR = obj
 OUTFILE = sim.out
 
@@ -6,6 +6,7 @@ CC = gcc
 LD = ld
 
 CCFLAGS := -c -g
+LDFLAGS := -lncurses
 
 SRC_C   := $(shell find ${SRCDIR} -name "*.c")
 OBJ     := $(patsubst ${SRCDIR}%.c, ${OBJDIR}%.o, ${SRC_C})
@@ -16,7 +17,7 @@ DIRS := $(patsubst ${SRCDIR}%, ${OBJDIR}%, ${DIRS})
 all: ${DIRS} link
 
 link: ${OBJ}
-	@${CC} -o ${OUTFILE} $^
+	@${CC} ${LDFLAGS} -o ${OUTFILE} $^
 
 ${DIRS}:
 	@mkdir -p $@
