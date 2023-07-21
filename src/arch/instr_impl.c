@@ -36,7 +36,7 @@ uint64_t add_impl(uint64_t val0, uint64_t val1, size_t size, uint8_t *flags) {
 	bool oflow = (val0 >> s_bit) == (val1 >> s_bit) ? (val0 >> s_bit) != (full_add >> s_bit) : 0;
 
 	// Half add
-	uint8_t hc_bit = (size * 8) - 5;
+	uint8_t hc_bit = (size * 8) - 4;
 	uint64_t hc_mask = (1 << hc_bit) - 1;
 	uint64_t half_add = (val0 & hc_mask) + (val1 & hc_mask);
 
@@ -182,18 +182,18 @@ void instr_shift(struct u8_arch *arch, uint8_t flags, struct u8_oper *op0, struc
 	// Limit shift size
 	shift &= 0b111;
 
-	// Apply shift
-	if (flags & 1)
-		val >>= shift;
-	else
-	 	val <<= shift;
-
 	// Mask the flags
 	uint8_t psw = arch->regs.psw;
 	psw &= 0b01111111;
 
-	uint8_t s_bit = op0->size * 8 - 1;
-	psw |= ((val >> s_bit) & 1) << 7;
+	// Apply shift
+	if (flags & 1) {
+		psw |= ((val >> (shift - 1)) & 1) << 7;
+		val >>= shift;
+	} else {
+		psw |= ((val >> (op0->size * 8 - shift)) & 1) << 7;
+		val <<= shift;
+	}
 
 	arch->regs.psw = psw;
 
@@ -352,7 +352,31 @@ void instr_lea(struct u8_arch *arch, uint8_t flags, struct u8_oper *op0, struct 
 
 // ALU Instructions
 void instr_daa(struct u8_arch *arch, uint8_t flags, struct u8_oper *op0, struct u8_oper *op1) {
-	INSTR_NOT_IMPL(arch, "DAA");
+	uint64_t val = oper_read(arch, op0);
+
+	bool c = (arch->regs.psw & 0x80) >> 7;
+	bool hc = (arch->regs.psw & 0x4) >> 2;
+
+	uint8_t psw = arch->regs.psw & 0b00011011;
+
+	if (hc || (val & 0x0f) > 0x9) {
+		val += 0x06;
+		psw |= 1 << 2;
+	}
+
+	if (c || (val & 0xf0) > 0x90) {
+		val += 0x60;
+		psw |= 1 << 7;
+	}
+
+	val &= 0xff;
+
+	psw |= (val == 0) << 6;
+	psw |= (val >> 7) << 5;
+
+	arch->regs.psw = psw;
+
+	oper_write(arch, op0, val);
 }
 
 void instr_das(struct u8_arch *arch, uint8_t flags, struct u8_oper *op0, struct u8_oper *op1) {

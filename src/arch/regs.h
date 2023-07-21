@@ -6,7 +6,7 @@
 struct u8_arch;
 
 /* CPU Registers */
-struct u8_cpu_regs {
+struct u8_regs {
 	uint8_t gp[16];		// General purpose registers
 	uint16_t pc;		// Program counter
 	uint8_t csr;		// Code segment register

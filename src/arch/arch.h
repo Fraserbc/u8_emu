@@ -5,7 +5,7 @@
 #include "mem.h"
 
 struct u8_arch {
-	struct u8_cpu_regs regs;
+	struct u8_regs regs;
 	uint8_t cur_dsr;
 	struct u8_mem mem;
 };

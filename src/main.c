@@ -163,6 +163,7 @@ int main(int argc, char **argv) {
 	arch->regs.pc = 0x3a6c;
 	arch->regs.sp = 0x8dec;
 
+	arch->regs.lr = 0xffff;
 
 	// Ncurses initialisation
 	setlocale(LC_ALL, "");
@@ -204,16 +205,18 @@ int main(int argc, char **argv) {
 
 	uint8_t last_ready = 0;
 
-	//FILE *addr_log = fopen("addr_log.txt", "w");
+	FILE *log_file = fopen("sim.log", "w");
 	while (true) {
 		// Log the PCs to a file
-		//fprintf(addr_log, "%04x\n", arch->regs.pc);
-		//fflush(addr_log);
+		fprintf(log_file, "ADDR: %04x\n", arch->regs.pc);
+		//for (int i = 0; i < 16; i++) fprintf(log_file, "%02x ", arch->regs.gp[i]);
+		/*fprintf(log_file, "\nPSW: %02x\n", arch->regs.psw);*/
+		//fflush(log_file);
 
 		// Hook the render function
 		if (arch->regs.pc == 0x2ec0) render(arch, lcd_win);
 
-		if (arch->regs.pc == 0x3afa) break;
+		if (arch->regs.pc == 0xFFFF) break;
 
 		uint8_t ready = read_mem_data(arch, 0, 0x8e00, 1);
 
@@ -228,19 +231,14 @@ int main(int argc, char **argv) {
 		if (ch == KEY_MOUSE && ready) {
 			MEVENT event;
 			if (getmouse(&event) == OK) {
-				if (event.bstate & BUTTON1_RELEASED) {
-					write_mem_data(arch, 0, 0x8e01, 1, 0);
-					write_mem_data(arch, 0, 0x8e02, 1, 0);
-				} else {
-					int x = event.x;
-					int y = event.y;
-					if (wmouse_trafo(keypad_win, &y, &x, false)) {
-						for (int i = 0; i < NUM_KEYS; i++)
-							if ((x >= keys[i].x0) && (x <= keys[i].x1) && (y >= keys[i].y0) && (y <= keys[i].y1)) {
-								write_mem_data(arch, 0, 0x8e01, 1, keys[i].ki);
-								write_mem_data(arch, 0, 0x8e02, 1, keys[i].ko);
-							}
-					}
+				int x = event.x;
+				int y = event.y;
+				if (wmouse_trafo(keypad_win, &y, &x, false)) {
+					for (int i = 0; i < NUM_KEYS; i++)
+						if ((x >= keys[i].x0) && (x <= keys[i].x1) && (y >= keys[i].y0) && (y <= keys[i].y1)) {
+							write_mem_data(arch, 0, 0x8e01, 1, keys[i].ki);
+							write_mem_data(arch, 0, 0x8e02, 1, keys[i].ko);
+						}
 				}
 			}
 		}
@@ -248,9 +246,14 @@ int main(int argc, char **argv) {
 		u8_step(arch);
 	}
 
-	endwin();
+	wprintw(cons_win, "Emulator exited cleanly\n");
+	wrefresh(cons_win);
 
-	printf("Emulator exited cleanly\n");
+	fflush(log_file);
+
+	while (getch() == ERR) {}
+
+	endwin();
 
 	return 0;
 }
