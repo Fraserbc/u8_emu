@@ -96,7 +96,7 @@ int main(int argc, char **argv) {
 
 	ctx->mem.regions[1].type = U8_REGION_DATA;
 	ctx->mem.regions[1].addr_l = 0x08000;
-	ctx->mem.regions[1].addr_h = 0x10000;
+	ctx->mem.regions[1].addr_h = 0x0FFFF;
 	ctx->mem.regions[1].read = &data_mem_read;
 	ctx->mem.regions[1].write = &data_mem_write;
 
@@ -127,7 +127,7 @@ int main(int argc, char **argv) {
 	write_mem_data(ctx, 0, 0x8e00, 1, 1);
 
 	// Set PC and SP
-	ctx->regs.pc = 0x3a6c;
+	ctx->regs.pc = 0x39aa;
 	ctx->regs.sp = 0x8dec;
 	ctx->regs.lr = 0xffff;
 
@@ -136,10 +136,12 @@ int main(int argc, char **argv) {
 	FILE *log_file = fopen("sim.log", "w");
 	while (true) {
 		// Log the PCs to a file
-		fprintf(log_file, "ADDR: %04x\n", ctx->regs.pc);
-		/*for (int i = 0; i < 16; i++) fprintf(log_file, "%02x ", ctx->regs.gp[i]);
-		fprintf(log_file, "\nPSW: %02x\n", ctx->regs.psw);*/
-		fflush(log_file);
+		/*fprintf(log_file, "ADDR: %04x\n", ctx->regs.pc);
+		for (int i = 0; i < 16; i++) fprintf(log_file, "%02x ", ctx->regs.gp[i]);
+		fprintf(log_file, "\nPSW: %02x\n", ctx->regs.psw);
+		fflush(log_file);*/
+
+		if (ctx->regs.pc == 0xFFFF) break;
 
 		// Hook the render function
 		if (ctx->regs.pc == 0x2ec0 || count % 1000 == 0) render(ctx, ctx->periph.lcd_win);
@@ -156,6 +158,7 @@ int main(int argc, char **argv) {
 	//fflush(log_file);
 	//fclose(log_file);
 
+	while(1) {}
 	while (getch() == ERR) {}
 
 	endwin();
