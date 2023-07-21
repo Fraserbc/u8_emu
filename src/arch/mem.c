@@ -17,21 +17,6 @@ void init_mem(uint8_t *code) {
 int count = 0;
 
 uint64_t read_mem_data(struct u8_arch *arch, uint8_t dsr, uint16_t addr, uint8_t size) {
-	if (addr == 0x8e01) {
-		count++;
-		if ((count >> 1) % 100 == 0)
-			return 0x80;
-		else
-			return 0x00;
-	}
-
-	if (addr == 0x8e02) {
-		if ((count >> 1) % 100 == 0)
-			return 0x01;
-		else
-			return 0x00;
-	}
-
 	switch (dsr) {
 		case 0: {
 			if (addr & 0x8000) {
@@ -50,7 +35,6 @@ uint64_t read_mem_data(struct u8_arch *arch, uint8_t dsr, uint16_t addr, uint8_t
 
 // Data memory writes
 void write_mem_data(struct u8_arch *arch, uint8_t dsr, uint16_t addr, uint8_t size, uint64_t val) {
-	//if ((addr & 0xF000) == 0xF000) printf("Write: %04x to %04x @ %04x\n", val, addr, arch->regs.pc);
 	if (dsr != 0 || ((addr & 0x8000) == 0)) return;
 	for (int x = 0; x < size; x++)
 		data_mem[addr - 0x8000 + x] = (val >> (8 * x)) & 0xff;
