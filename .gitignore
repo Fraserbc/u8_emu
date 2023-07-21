@@ -3,3 +3,4 @@ obj/
 sim.out
 rom_emu.bin
 docs/nX-U8100 Core Instruction Manual.pdf
+addr_log.txt

@@ -156,10 +156,9 @@ int main(int argc, char **argv) {
 
 	write_mem_data(arch, 0, 0x811d, 1, 1);
 
-	arch->regs.pc = 0x3a6c;
+	arch->regs.pc = 0x3ab4;
 	arch->regs.sp = 0x8dec;
 
-	int count = 0;
 
 	// Ncurses initialisation
 	setlocale(LC_ALL, "");
@@ -201,11 +200,16 @@ int main(int argc, char **argv) {
 
 	uint8_t last_ready = 0;
 
+	//FILE *addr_log = fopen("addr_log.txt", "w");
 	while (true) {
+		// Log the PCs to a file
+		//fprintf(addr_log, "%04x\n", arch->regs.pc);
+		//fflush(addr_log);
+
 		// Hook the render function
 		if (arch->regs.pc == 0x2ec0) render(arch, lcd_win);
 
-		//if (arch->regs.pc == 0x3afa) break;
+		if (arch->regs.pc == 0x3afa) break;
 
 		uint8_t ready = read_mem_data(arch, 0, 0x8e00, 1);
 
@@ -239,6 +243,10 @@ int main(int argc, char **argv) {
 
 		u8_step(arch);
 	}
+
+	endwin();
+
+	printf("Emulator exited cleanly\n");
 
 	return 0;
 }
