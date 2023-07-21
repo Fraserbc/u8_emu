@@ -56,11 +56,15 @@ struct keypad_key {
 struct keypad_key keys[] ={
 	{0,   0, 6,   2, "Shift", 0x80, 0x01},	// Shift
 	{7,   0, 13,  2, "Alpha", 0x80, 0x02},	// Alpha
+	{18,  0, 24,  3, "Up",    0x80, 0x04},	// Up
+	{25,  2, 28,  4, "Down",  0x80, 0x08},	// Down
 	{29,  0, 35,  2, "Mode",  0x80, 0x10},	// Mode
 	{36,  0, 42,  2, "On"},		// On
 
 	{0,   4, 6,   6, "Abs",   0x40, 0x01},	// Abs
 	{7,   4, 13,  6, "x^3",   0x40, 0x02},	// x^3
+	{14,  2, 17,  4, "Left",  0x40, 0x04},	// Left
+	{18,  4, 24,  6, "Down",  0x40, 0x08},	// Right
 	{29,  4, 35,  6, "x^-1",  0x40, 0x10},	// x^-1
 	{36,  4, 42,  6, "log_x", 0x40, 0x20},	// log_x
 
@@ -156,7 +160,7 @@ int main(int argc, char **argv) {
 
 	write_mem_data(arch, 0, 0x811d, 1, 1);
 
-	arch->regs.pc = 0x3ab4;
+	arch->regs.pc = 0x3a6c;
 	arch->regs.sp = 0x8dec;
 
 
