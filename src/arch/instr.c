@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+#include "../context.h"
 #include "arch.h"
 #include "regs.h"
 #include "instr.h"
@@ -219,20 +220,20 @@ struct u8_instr *u8_decode(uint16_t instr) {
 }
 
 /* Operand Handlers */
-struct u8_oper oper_reg_gp(struct u8_arch *arch, struct u8_instr_oper *oper, uint32_t val) {
+struct u8_oper oper_reg_gp(struct u8_sim_ctx *ctx, struct u8_instr_oper *oper, uint32_t val) {
 	return (struct u8_oper){.type=OPER_REG_GP, .size=oper->flags, .reg=val};
 }
 
-struct u8_oper oper_reg_ctrl(struct u8_arch *arch, struct u8_instr_oper *oper, uint32_t val) {
+struct u8_oper oper_reg_ctrl(struct u8_sim_ctx *ctx, struct u8_instr_oper *oper, uint32_t val) {
 	return (struct u8_oper){.type=OPER_REG_CTRL, .size=oper->flags >> 4, .reg=oper->flags & 0xf};
 }
 
-struct u8_oper oper_mem(struct u8_arch *arch, struct u8_instr_oper *oper, uint32_t val) {
+struct u8_oper oper_mem(struct u8_sim_ctx *ctx, struct u8_instr_oper *oper, uint32_t val) {
 	// Get displacement
 	uint16_t disp = 0;
 	switch ((oper->flags & 0x0f00) >> 8) {
 		case 0: break;							// No Displacement
-		case 1: disp = u8_fetch(arch); break;	// Next word
+		case 1: disp = u8_fetch(ctx); break;	// Next word
 		case 2: disp = val; break;				// Displacement from instruction
 	}
 
@@ -246,10 +247,10 @@ struct u8_oper oper_mem(struct u8_arch *arch, struct u8_instr_oper *oper, uint32
 	uint16_t reg_val = 0;
 	switch (oper->flags & 0x000f) {
 		case 0: break;	// No Register
-		case 1: reg_val = arch->regs.ea; break;					// EA
-		case 2: reg_val = read_reg_er(arch, val); break;	// ER from instruction	
-		case 3: reg_val = read_reg_er(arch, 12); break;	// BP
-		case 4: reg_val = read_reg_er(arch, 14); break;	// FP
+		case 1: reg_val = ctx->regs.ea; break;			// EA
+		case 2: reg_val = read_reg_er(ctx, val); break;	// ER from instruction	
+		case 3: reg_val = read_reg_er(ctx, 12); break;	// BP
+		case 4: reg_val = read_reg_er(ctx, 14); break;	// FP
 	}
 
 	uint16_t addr = reg_val + disp;
@@ -259,12 +260,12 @@ struct u8_oper oper_mem(struct u8_arch *arch, struct u8_instr_oper *oper, uint32
 
 	// Increment EA
 	if (oper->flags & 0x8000)
-		arch->regs.ea += size;
+		ctx->regs.ea += size;
 	
 	return (struct u8_oper){.type=OPER_MEM, .size=size, .addr=addr};
 }
 
-struct u8_oper oper_imm(struct u8_arch *arch, struct u8_instr_oper *oper, uint32_t val) {
+struct u8_oper oper_imm(struct u8_sim_ctx *ctx, struct u8_instr_oper *oper, uint32_t val) {
 	// Do we need sign extension?
 	if (oper->flags != 0 && (val >> oper->flags) & 1) {
 		val |= (-1) << oper->flags;
@@ -273,42 +274,42 @@ struct u8_oper oper_imm(struct u8_arch *arch, struct u8_instr_oper *oper, uint32
 	return (struct u8_oper){.type=OPER_IMM, .size=0, .imm=val};
 }
 
-uint64_t oper_read(struct u8_arch *arch, struct u8_oper *oper) {
+uint64_t oper_read(struct u8_sim_ctx *ctx, struct u8_oper *oper) {
 	switch (oper->type) {
-		case OPER_REG_GP: return read_reg(arch, oper->reg, oper->size);
+		case OPER_REG_GP: return read_reg(ctx, oper->reg, oper->size);
 
 		case OPER_REG_CTRL: switch (oper->reg) {
-			case 0: return arch->regs.ecsr[arch->regs.psw & 3];
-			case 1: return arch->regs.elr[arch->regs.psw & 3];
-			case 2: return arch->regs.psw;
-			case 3: return arch->regs.epsw[arch->regs.psw & 3];
-			case 4: return arch->regs.sp;
-			case 5: return arch->regs.csr;
+			case 0: return ctx->regs.ecsr[ctx->regs.psw & 3];
+			case 1: return ctx->regs.elr[ctx->regs.psw & 3];
+			case 2: return ctx->regs.psw;
+			case 3: return ctx->regs.epsw[ctx->regs.psw & 3];
+			case 4: return ctx->regs.sp;
+			case 5: return ctx->regs.csr;
 		}
 
-		case OPER_MEM: return read_mem_data(arch, arch->cur_dsr, oper->addr, oper->size);
+		case OPER_MEM: return read_mem_data(ctx, ctx->cur_dsr, oper->addr, oper->size);
 
 		case OPER_IMM: return (uint64_t) oper->imm;
 	}
 }
 
-void oper_write(struct u8_arch *arch, struct u8_oper *oper, uint64_t val) {
+void oper_write(struct u8_sim_ctx *ctx, struct u8_oper *oper, uint64_t val) {
 	switch (oper->type) {
 		case OPER_REG_GP:
-			write_reg(arch, oper->reg, oper->size, val);
+			write_reg(ctx, oper->reg, oper->size, val);
 			break;
 
 		case OPER_REG_CTRL: switch (oper->reg) {
-			case 0: arch->regs.ecsr[arch->regs.psw & 3] = val; break;
-			case 1: arch->regs.elr[arch->regs.psw & 3] = val; break;
-			case 2: arch->regs.psw = val; break;
-			case 3: arch->regs.epsw[arch->regs.psw & 3] = val; break;
-			case 4: arch->regs.sp = val; break;
-			case 5: arch->regs.csr = val; break;
+			case 0: ctx->regs.ecsr[ctx->regs.psw & 3] = val; break;
+			case 1: ctx->regs.elr[ctx->regs.psw & 3] = val; break;
+			case 2: ctx->regs.psw = val; break;
+			case 3: ctx->regs.epsw[ctx->regs.psw & 3] = val; break;
+			case 4: ctx->regs.sp = val; break;
+			case 5: ctx->regs.csr = val; break;
 		} break;
 
 		case OPER_MEM:
-			write_mem_data(arch, arch->cur_dsr, oper->addr, oper->size, val);
+			write_mem_data(ctx, ctx->cur_dsr, oper->addr, oper->size, val);
 			break;
 
 		case OPER_IMM: break;
