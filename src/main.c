@@ -123,48 +123,58 @@ int main(int argc, char **argv) {
 	init_periph(ctx);
 
 	// Controls writing to buffer or real screen
-	write_mem_data(ctx, 0, 0x811d, 1, 1);
+	/*write_mem_data(ctx, 0, 0x811d, 1, 1);
 
-	write_mem_data(ctx, 0, 0x8e00, 1, 1);
+	write_mem_data(ctx, 0, 0x8e00, 1, 1);*/
 
 	// Set PC and SP
-	ctx->regs.pc = 0x39aa;
-	ctx->regs.sp = 0x8dec;
-	ctx->regs.lr = 0xffff;
+	ctx->regs.pc = read_mem_data(ctx, 0, 0x0002, 2);
+	ctx->regs.sp = read_mem_data(ctx, 0, 0x0002, 0);
 
 	int count = 0;
 
 	FILE *log_file = fopen("sim.log", "w");
 	ctx->log_file = log_file;
 
-	bool log = false;
-
 	while (true) {
 		// Log the PCs to a file
-		/*if (log) {
-			fprintf(log_file, "ADDR: %x:%04x SP: %04x\n", ctx->regs.csr, ctx->regs.pc, ctx->regs.sp);
-			fprintf(log_file, "REGS: ");
-			for (int i = 0; i < 16; i++) fprintf(log_file, "%02x ", ctx->regs.gp[i]);
-			fprintf(log_file, "\nSTACK: ");
-			for (int i = 0; i < 24; i++) fprintf(log_file, "%02x ", read_mem_data(ctx, 0, ctx->regs.sp + i, 1));
-			fprintf(log_file, "\n");
-			
-			fprintf(log_file, "%s SP @ %x:%04x\n", ctx->regs.sp & 1 ? "Unaligned" : "Aligned", ctx->regs.csr, ctx->regs.pc);
+		/*fprintf(log_file, "ADDR: %x:%04x SP: %04x PSW %04x\n", ctx->regs.csr, ctx->regs.pc, ctx->regs.sp, ctx->regs.psw);
+		fprintf(log_file, "REGS: ");
+		for (int i = 0; i < 16; i++) fprintf(log_file, "%02x ", ctx->regs.gp[i]);
+		fprintf(log_file, "\nSTACK: ");
+		for (int i = 0; i < 32; i++) fprintf(log_file, "%02x ", read_mem_data(ctx, 0, ctx->regs.sp + i, 1));
+		fprintf(log_file, "\n");
+	
 
-			fflush(log_file);
-		}*/
+		fflush(log_file);*/
 
-		if (ctx->regs.pc == 0xFFFF) break;
-
-		//if (ctx->regs.pc == 0xb3e0) ctx->regs.pc = 0xb41a;
-
-		if (ctx->regs.pc == 0xb404) {
-			wprintw(ctx->periph.cons_win, "Keycode: %02x\n", read_reg_r(ctx, 0));
+		/*if (ctx->regs.csr == 0x01 && ctx->regs.pc == 0x86d0) {
+			wprintw(ctx->periph.cons_win, "REG 0: ");
+			for (int x = 0; x < 0xB; x++) wprintw(ctx->periph.cons_win, "%02x ", read_mem_data(ctx, 0, 0x8000 + x, 1));
+			wprintw(ctx->periph.cons_win, "\nREG 1: ");
+			for (int x = 0; x < 0xB; x++) wprintw(ctx->periph.cons_win, "%02x ", read_mem_data(ctx, 0, 0x8010 + x, 1));
+			wprintw(ctx->periph.cons_win, "\n");
 			wrefresh(ctx->periph.cons_win);
 		}
 
-		//if (ctx->regs.pc == 0x7142) log = true;
-		//if (ctx->regs.pc == 0x71a6) log = false;
+		if(ctx->regs.csr == 0x01 && ctx->regs.pc >= 0x89a0 && ctx->regs.pc <= 0x89cc) {
+			wprintw(ctx->periph.cons_win, "%016lx %016lx SW %02x\n", read_reg_qr(ctx, 0), read_reg_qr(ctx, 8), ctx->regs.psw);
+			wrefresh(ctx->periph.cons_win);
+			getch();
+		}*/
+
+		/*if (count % 10000 == 0) {
+			for (int i = 0; i < 10; i++) wprintw(ctx->periph.cons_win, "%02x ", read_mem_data(ctx, 0, 0x8230 + i, 1));
+			wprintw(ctx->periph.cons_win, "\n");
+			wrefresh(ctx->periph.cons_win);
+		}*/
+
+		//if (ctx->regs.pc == 0xb3e0) ctx->regs.pc = 0xb41a;
+
+		/*if (ctx->regs.pc == 0xb404) {
+			wprintw(ctx->periph.cons_win, "Keycode: %02x\n", read_reg_r(ctx, 0));
+			wrefresh(ctx->periph.cons_win);
+		}*/
 
 		// Hook the render function
 		if (ctx->regs.pc == 0x2ec0 || count % 1000 == 0) render(ctx, ctx->periph.lcd_win);

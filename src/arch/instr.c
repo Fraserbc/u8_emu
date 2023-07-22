@@ -43,13 +43,13 @@
 static struct u8_instr u8_instr_table[] = {
 	// Arithmetic Instructions
 	{&instr_add,		0x8001,	0x00,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{0x00f0, 4,  0x0001, &oper_reg_gp}},	// Add	Rn, 	Rm
-	{&instr_add,		0x1000,	0x00,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{0x00ff, 0,  0x0007, &oper_imm}},		// Add	Rn, 	#imm8
+	{&instr_add,		0x1000,	0x00,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{0x00ff, 0,  0x0000, &oper_imm}},		// Add	Rn, 	#imm8
 	{&instr_add,		0xf006, 0x00,	{0x0e00, 8,  0x0002, &oper_reg_gp},		{0x00e0, 4,  0x0002, &oper_reg_gp}},	// Add	ERn, 	ERm
 	{&instr_add,		0xe080, 0x00,	{0x0e00, 8,  0x0002, &oper_reg_gp},		{0x007f, 0,  0x0006, &oper_imm}},		// Add	ERn, 	#imm7
 	{&instr_addc,		0x8006,	0x00,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{0x00f0, 4,  0x0001, &oper_reg_gp}},	// ADDC	Rn, 	Rm
-	{&instr_addc,		0x6000,	0x00,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{0x00ff, 0,  0x0007, &oper_imm}},		// ADDC	Rn, 	#imm8
+	{&instr_addc,		0x6000,	0x00,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{0x00ff, 0,  0x0000, &oper_imm}},		// ADDC	Rn, 	#imm8
 	{&instr_and,		0x8002,	0x00,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{0x00f0, 4,  0x0001, &oper_reg_gp}},	// AND	Rn, 	Rm
-	{&instr_and,		0x2000,	0x00,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{0x00ff, 0,  0x0007, &oper_imm}},		// AND	Rn,		#imm8
+	{&instr_and,		0x2000,	0x00,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{0x00ff, 0,  0x0000, &oper_imm}},		// AND	Rn,		#imm8
 	{&instr_cmp,		0x8007,	0x00,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{0x00f0, 4,  0x0001, &oper_reg_gp}},	// CMP	Rn,		Rm
 	{&instr_cmp,		0x7000,	0x00,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{0x00ff, 0,  0x0000, &oper_imm}},		// CMP	Rn,		#imm8
 	{&instr_cmpc,		0x8005,	0x00,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{0x00f0, 4,  0x0001, &oper_reg_gp}},	// CMPC	Rn,		Rm
@@ -57,11 +57,11 @@ static struct u8_instr u8_instr_table[] = {
 	{&instr_mov,		0xf005,	0x00,	{0x0e00, 8,  0x0002, &oper_reg_gp},		{0x00e0, 4,  0x0002, &oper_reg_gp}},	// MOV	ERn,	ERm
 	{&instr_mov,		0xe000,	0x00,	{0x0e00, 8,  0x0002, &oper_reg_gp},		{0x007f, 0,  0x0006, &oper_imm}},		// MOV	ERn,	#imm7
 	{&instr_mov,		0x8000,	0x00,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{0x00f0, 4,  0x0001, &oper_reg_gp}},	// MOV	Rn,		Rm
-	{&instr_mov,		0x0000,	0x00,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{0x00ff, 0,  0x0007, &oper_imm}},		// MOV	Rn,		#imm8
+	{&instr_mov,		0x0000,	0x00,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{0x00ff, 0,  0x0000, &oper_imm}},		// MOV	Rn,		#imm8
 	{&instr_or,			0x8003,	0x00,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{0x00f0, 4,  0x0001, &oper_reg_gp}},	// OR	Rn,		Rm
-	{&instr_or,			0x3000,	0x00,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{0x00ff, 0,  0x0007, &oper_imm}},		// OR	Rn,		#imm8
+	{&instr_or,			0x3000,	0x00,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{0x00ff, 0,  0x0000, &oper_imm}},		// OR	Rn,		#imm8
 	{&instr_xor,		0x8004,	0x00,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{0x00f0, 4,  0x0001, &oper_reg_gp}},	// XOR	Rn,		Rm
-	{&instr_xor,		0x4000,	0x00,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{0x00ff, 0,  0x0007, &oper_imm}},		// XOR	Rn,		#imm8
+	{&instr_xor,		0x4000,	0x00,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{0x00ff, 0,  0x0000, &oper_imm}},		// XOR	Rn,		#imm8
 	{&instr_cmp,		0xf007,	0x00,	{0x0e00, 8,  0x0002, &oper_reg_gp},		{0x00e0, 4,  0x0002, &oper_reg_gp}},	// CMP	ERn,	ERm
 	{&instr_sub,		0x8008,	0x00,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{0x00f0, 4,  0x0001, &oper_reg_gp}},	// SUB	Rn,		Rm
 	{&instr_subc,		0x8009,	0x00,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{0x00f0, 4,  0x0001, &oper_reg_gp}},	// SUBC	Rn,		Rm
@@ -179,7 +179,7 @@ static struct u8_instr u8_instr_table[] = {
 	{&instr_brel,		0xc000,	0x00,	{0x0f00, 8,	 0x0000, &oper_imm},		{0x00ff, 0,  0x0007, &oper_imm}},		// B*	Radr
 
 	// Sign Extension Instruction
-	{&instr_extbw,		0x810f,	0x00,   {0x00e0, 4,  0x0000, &oper_reg_gp},		{.handler = NULL}},						// EXTBW ERn
+	{&instr_extbw,		0x810f,	0x00,   {0x0e00, 8,  0x0002, &oper_reg_gp},		{0x00e0, 4,  0x0002, &oper_reg_gp}},	// EXTBW ERn
 
 	// Software Interrupt Instructions
 	{&instr_swi,		0xe500,	0x00,	{0x003f, 0,  0x0000, &oper_imm},		{.handler = NULL}},						// SWI	#snum

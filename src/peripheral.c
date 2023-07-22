@@ -123,7 +123,7 @@ void init_periph(struct u8_sim_ctx *ctx) {
 	box(keypad_border, 0, 0);
 	wrefresh(keypad_border);
 
-	WINDOW *cons_border = newwin(20, 50, 10, 0);
+	WINDOW *cons_border = newwin(30, 50, 10, 0);
 	box(cons_border, 0, 0);
 	wrefresh(cons_border);
 
@@ -139,12 +139,14 @@ void init_periph(struct u8_sim_ctx *ctx) {
 	wrefresh(ctx->periph.keypad_win);
 
 	// Console window
-	ctx->periph.cons_win = newwin(18, 48, 11, 1);
+	ctx->periph.cons_win = newwin(28, 48, 11, 1);
 	scrollok(ctx->periph.cons_win, true);
 
 	refresh();
 
 	// TODO: Initialise the keyboard memory region
+
+	// TODO: Initialise the screen memory region
 }
 
 uint8_t last_ready = 0;
@@ -168,8 +170,6 @@ void update_keyboard(struct u8_sim_ctx *ctx) {
 				if (wmouse_trafo(ctx->periph.keypad_win, &y, &x, false)) {
 					for (int i = 0; i < NUM_KEYS; i++)
 						if ((x >= keys[i].x0) && (x <= keys[i].x1) && (y >= keys[i].y0) && (y <= keys[i].y1)) {
-							wprintw(ctx->periph.cons_win, "%s\n", keys[i].name);
-							wrefresh(ctx->periph.cons_win);
 							write_mem_data(ctx, 0, 0x8e01, 1, keys[i].ki);
 							write_mem_data(ctx, 0, 0x8e02, 1, keys[i].ko);
 						}

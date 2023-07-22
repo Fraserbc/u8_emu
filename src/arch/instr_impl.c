@@ -28,8 +28,8 @@ void psw_set_zs(struct u8_sim_ctx *ctx, uint8_t size, uint64_t val) {
 uint64_t add_impl(uint64_t val0, uint64_t val1, size_t size, uint8_t *flags) {
 	// Full add
 	uint64_t full_add = val0 + val1;
-	bool carry = (full_add >> size * 8);
-	full_add &= (1 << size * 8) - 1;
+	bool carry = full_add >> (size * 8);
+	full_add &= (1 << (size * 8)) - 1;
 	bool zero = (full_add == 0);
 
 	uint8_t s_bit = size * 8 - 1;			// Sign bit
@@ -50,10 +50,41 @@ uint64_t add_impl(uint64_t val0, uint64_t val1, size_t size, uint8_t *flags) {
 	return full_add;
 }
 
+uint64_t sub_impl(uint64_t val0, uint64_t val1, size_t size, uint8_t *flags) {
+	// Invert val1
+	val1 ^= -1;
+	val1 += 1;
+
+	// Full add
+	uint64_t full_add = val0 + val1;
+	bool carry = full_add >> (size * 8);
+	full_add &= (1 << (size * 8)) - 1;
+	bool zero = (full_add == 0);
+
+	uint8_t s_bit = size * 8 - 1;			// Sign bit
+	bool sign = (full_add >> s_bit);
+
+	bool oflow = (val0 >> s_bit) == (val1 >> s_bit) ? (val0 >> s_bit) != (full_add >> s_bit) : 0;
+
+	// Half add
+	uint8_t hc_bit = (size * 8) - 4;
+	uint64_t hc_mask = (1 << hc_bit) - 1;
+	uint64_t half_add = (val0 & hc_mask) + (val1 & hc_mask);
+
+	bool hc = (val1 & hc_mask) == 0 ? 0 : (half_add >> hc_bit) ^ 1;
+
+	// Set flags
+	*flags = (carry << 7) | (zero << 6) | (sign << 5) | (oflow << 4) | (hc << 2);
+
+	return full_add;
+}
+
 // Arithmetic Instructions
 void instr_add(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0, struct u8_oper *op1) {
-	uint64_t val0 = oper_read(ctx, op0);
-	uint64_t val1 = oper_read(ctx, op1);
+	uint64_t mask = (1 << 8 * op0->size) - 1;
+
+	uint64_t val0 = oper_read(ctx, op0) & mask;
+	uint64_t val1 = oper_read(ctx, op1) & mask;
 
 	uint8_t psw_new;
 	uint64_t res = add_impl(val0, val1, op0->size, &psw_new);
@@ -68,8 +99,10 @@ void instr_add(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0, struc
 }
 
 void instr_addc(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0, struct u8_oper *op1) {
-	uint64_t val0 = oper_read(ctx, op0);
-	uint64_t val1 = oper_read(ctx, op1);
+	uint64_t mask = (1 << 8 * op0->size) - 1;
+
+	uint64_t val0 = oper_read(ctx, op0) & mask;
+	uint64_t val1 = oper_read(ctx, op1) & mask;
 
 	bool carry = ctx->regs.psw >> 7;
 
@@ -77,25 +110,20 @@ void instr_addc(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0, stru
 	uint64_t res = add_impl(val0, val1 + carry, op0->size, &psw_new);
 
 	// Set the new flags
-	ctx->regs.psw &= 0b00001011;
-	ctx->regs.psw |= psw_new;
+	ctx->regs.psw &= (psw_new | 0b10111111) & 0b01001011;
+	ctx->regs.psw |= psw_new & 0b10111111;
 
 	oper_write(ctx, op0, res);
 }
 
 void instr_cmp(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0, struct u8_oper *op1) {
-	uint64_t val0 = oper_read(ctx, op0);
-	uint64_t val1 = oper_read(ctx, op1);
+	uint64_t mask = (1 << 8 * op0->size) - 1;
 
-	// Make val1 negative
-	val1 ^= -1;
-	val1 += 1;
+	uint64_t val0 = oper_read(ctx, op0) & mask;
+	uint64_t val1 = oper_read(ctx, op1) & mask;
 
 	uint8_t psw_new;
-	uint64_t res = add_impl(val0, val1, op0->size, &psw_new);
-
-	// Invert the half carry flag for borrow
-	psw_new ^= 0b00000100;	
+	uint64_t res = sub_impl(val0, val1, op0->size, &psw_new);
 
 	// Set the new flags
 	ctx->regs.psw &= 0b00001011;
@@ -103,38 +131,29 @@ void instr_cmp(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0, struc
 }
 
 void instr_cmpc(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0, struct u8_oper *op1) {
-	uint64_t val0 = oper_read(ctx, op0);
-	uint64_t val1 = oper_read(ctx, op1);
+	uint64_t mask = (1 << 8 * op0->size) - 1;
 
-	// Make val1 negative
-	val1 += ctx->regs.psw >> 7;
-	val1 ^= -1;
-	val1 += 1;
+	uint64_t val0 = oper_read(ctx, op0) & mask;
+	uint64_t val1 = oper_read(ctx, op1) & mask;
+
+	bool carry = ctx->regs.psw >> 7;
 
 	uint8_t psw_new;
-	uint64_t res = add_impl(val0, val1, op0->size, &psw_new);
-
-	// Invert the half carry flag for borrow
-	psw_new ^= 0b00000100;	
+	uint64_t res = sub_impl(val0, val1 + carry, op0->size, &psw_new);
 
 	// Set the new flags
-	ctx->regs.psw &= 0b00001011;
-	ctx->regs.psw |= psw_new;
+	ctx->regs.psw &= (psw_new | 0b10111111) & 0b01001011;
+	ctx->regs.psw |= psw_new & 0b10111111;
 }
 
 void instr_sub(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0, struct u8_oper *op1) {
-	uint64_t val0 = oper_read(ctx, op0);
-	uint64_t val1 = oper_read(ctx, op1);
+	uint64_t mask = (1 << 8 * op0->size) - 1;
 
-	// Make val1 negative
-	val1 ^= -1;
-	val1 += 1;
+	uint64_t val0 = oper_read(ctx, op0) & mask;
+	uint64_t val1 = oper_read(ctx, op1) & mask;
 
 	uint8_t psw_new;
-	uint64_t res = add_impl(val0, val1, op0->size, &psw_new);
-
-	// Invert the half carry flag for borrow
-	psw_new ^= 0b00000100;	
+	uint64_t res = sub_impl(val0, val1, op0->size, &psw_new);
 
 	// Set the new flags
 	ctx->regs.psw &= 0b00001011;
@@ -144,23 +163,18 @@ void instr_sub(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0, struc
 }
 
 void instr_subc(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0, struct u8_oper *op1) {
-	uint64_t val0 = oper_read(ctx, op0);
-	uint64_t val1 = oper_read(ctx, op1);
+	uint64_t mask = (1 << 8 * op0->size) - 1;
 
-	// Make val1 negative
-	val1 += ctx->regs.psw >> 7;
-	val1 ^= -1;
-	val1 += 1;
+	uint64_t val0 = oper_read(ctx, op0) & mask;
+	uint64_t val1 = oper_read(ctx, op1) & mask;
+
+	bool carry = ctx->regs.psw >> 7;
 
 	uint8_t psw_new;
-	uint64_t res = add_impl(val0, val1, op0->size, &psw_new);
+	uint64_t res = sub_impl(val0, val1 + carry, op0->size, &psw_new);
 
-	// Invert the half carry flag for borrow
-	psw_new ^= 0b00000100;	
-
-	// Set the new flags
-	ctx->regs.psw &= 0b00001011;
-	ctx->regs.psw |= psw_new;
+	ctx->regs.psw &= (psw_new | 0b10111111) & 0b01001011;
+	ctx->regs.psw |= psw_new & 0b10111111;
 
 	oper_write(ctx, op0, res);
 }
@@ -360,7 +374,7 @@ void instr_daa(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0, struc
 	bool c = (ctx->regs.psw & 0x80) >> 7;
 	bool hc = (ctx->regs.psw & 0x4) >> 2;
 
-	uint8_t psw = ctx->regs.psw & 0b00011011;
+	uint8_t psw = ctx->regs.psw & 0b10011011;
 
 	if (hc || (val & 0x0f) > 0x9) {
 		val += 0x06;
@@ -388,17 +402,15 @@ void instr_das(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0, struc
 	bool c = (ctx->regs.psw & 0x80) >> 7;
 	bool hc = (ctx->regs.psw & 0x4) >> 2;
 
-	uint8_t psw = ctx->regs.psw & 0b00011011;
+	uint8_t psw = ctx->regs.psw & 0b10011011;
 
 	if (hc || (val & 0x0f) > 0x09) {
 		val -= 0x06;
-	} else {
 		psw |= 1 << 2;
 	}
 
 	if (c || (val & 0xf0) > 0x90) {
 		val -= 0x60;
-	} else {
 		psw |= 1 << 7;
 	}
 
@@ -424,7 +436,7 @@ void instr_neg(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0, struc
 	ctx->regs.psw &= 0b00001011;
 	ctx->regs.psw |= psw_new;
 
-	oper_write(ctx, op0, val);
+	oper_write(ctx, op0, res);
 }
 
 // Bit Access Instructions
@@ -566,12 +578,17 @@ void instr_brel(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0, stru
 
 	// Apply the offset
 	int64_t offset = oper_read(ctx, op1);
-	ctx->regs.pc += offset * 2;
+	ctx->regs.pc += offset << 1;
 }
 
 // Sign Extension Instruction
 void instr_extbw(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0, struct u8_oper *op1) {
-	INSTR_NOT_IMPL(arch, "EXTBW");
+	uint64_t val = oper_read(ctx, op1);
+	
+	uint64_t m = 1 << (op0->size * 4 - 1);
+	val = (val ^ m) - m;
+
+	oper_write(ctx, op1, val);
 }
 
 // Software Interrupt Instructions
