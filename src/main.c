@@ -148,7 +148,7 @@ int main(int argc, char **argv) {
 
 		fflush(log_file);*/
 
-		/*if (ctx->regs.csr == 0x01 && ctx->regs.pc == 0x86d0) {
+		if (ctx->regs.csr == 0x01 && ctx->regs.pc == 0x86d0) {
 			wprintw(ctx->periph.cons_win, "REG 0: ");
 			for (int x = 0; x < 0xB; x++) wprintw(ctx->periph.cons_win, "%02x ", read_mem_data(ctx, 0, 0x8000 + x, 1));
 			wprintw(ctx->periph.cons_win, "\nREG 1: ");
@@ -160,8 +160,7 @@ int main(int argc, char **argv) {
 		if(ctx->regs.csr == 0x01 && ctx->regs.pc >= 0x89a0 && ctx->regs.pc <= 0x89cc) {
 			wprintw(ctx->periph.cons_win, "%016lx %016lx SW %02x\n", read_reg_qr(ctx, 0), read_reg_qr(ctx, 8), ctx->regs.psw);
 			wrefresh(ctx->periph.cons_win);
-			getch();
-		}*/
+		}
 
 		/*if (count % 10000 == 0) {
 			for (int i = 0; i < 10; i++) wprintw(ctx->periph.cons_win, "%02x ", read_mem_data(ctx, 0, 0x8230 + i, 1));

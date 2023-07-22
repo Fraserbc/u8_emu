@@ -427,11 +427,8 @@ void instr_das(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0, struc
 void instr_neg(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0, struct u8_oper *op1) {
 	uint64_t val = oper_read(ctx, op0);
 
-	val ^= (-1);
-	val += 1;
-
 	uint8_t psw_new;
-	uint64_t res = add_impl(0, val, op0->size, &psw_new);
+	uint64_t res = sub_impl(0, val, op0->size, &psw_new);
 	
 	ctx->regs.psw &= 0b00001011;
 	ctx->regs.psw |= psw_new;
@@ -659,7 +656,7 @@ void instr_dec(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0, struc
 	uint64_t val = oper_read(ctx, op0);
 
 	uint8_t psw_new;
-	uint64_t res = add_impl(val, -1, 1, &psw_new);
+	uint64_t res = sub_impl(val, 1, 1, &psw_new);
 
 	// Set the new flags
 	ctx->regs.psw &= 0b10001011;

@@ -114,6 +114,10 @@ void init_periph(struct u8_sim_ctx *ctx) {
 
 	refresh();
 
+	// Get window size
+	int screen_x, screen_y;
+	getmaxyx(stdscr, screen_y, screen_x);
+
 	// Setup window borders
 	WINDOW *lcd_border = newwin(10, 50, 0, 0);
 	box(lcd_border, 0, 0);
@@ -123,7 +127,7 @@ void init_periph(struct u8_sim_ctx *ctx) {
 	box(keypad_border, 0, 0);
 	wrefresh(keypad_border);
 
-	WINDOW *cons_border = newwin(30, 50, 10, 0);
+	WINDOW *cons_border = newwin(screen_y - 10, 50, 10, 0);
 	box(cons_border, 0, 0);
 	wrefresh(cons_border);
 
@@ -139,7 +143,7 @@ void init_periph(struct u8_sim_ctx *ctx) {
 	wrefresh(ctx->periph.keypad_win);
 
 	// Console window
-	ctx->periph.cons_win = newwin(28, 48, 11, 1);
+	ctx->periph.cons_win = newwin(screen_y - 12, 48, 11, 1);
 	scrollok(ctx->periph.cons_win, true);
 
 	refresh();
