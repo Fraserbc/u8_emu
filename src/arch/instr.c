@@ -51,9 +51,9 @@ static struct u8_instr u8_instr_table[] = {
 	{&instr_and,		0x8002,	0x00,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{0x00f0, 4,  0x0001, &oper_reg_gp}},	// AND	Rn, 	Rm
 	{&instr_and,		0x2000,	0x00,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{0x00ff, 0,  0x0007, &oper_imm}},		// AND	Rn,		#imm8
 	{&instr_cmp,		0x8007,	0x00,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{0x00f0, 4,  0x0001, &oper_reg_gp}},	// CMP	Rn,		Rm
-	{&instr_cmp,		0x7000,	0x00,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{0x00ff, 0,  0x0007, &oper_imm}},		// CMP	Rn,		#imm8
+	{&instr_cmp,		0x7000,	0x00,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{0x00ff, 0,  0x0000, &oper_imm}},		// CMP	Rn,		#imm8
 	{&instr_cmpc,		0x8005,	0x00,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{0x00f0, 4,  0x0001, &oper_reg_gp}},	// CMPC	Rn,		Rm
-	{&instr_cmpc,		0x5000,	0x00,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{0x00ff, 0,  0x0007, &oper_imm}},		// CMPC	Rn,		#imm8
+	{&instr_cmpc,		0x5000,	0x00,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{0x00ff, 0,  0x0000, &oper_imm}},		// CMPC	Rn,		#imm8
 	{&instr_mov,		0xf005,	0x00,	{0x0e00, 8,  0x0002, &oper_reg_gp},		{0x00e0, 4,  0x0002, &oper_reg_gp}},	// MOV	ERn,	ERm
 	{&instr_mov,		0xe000,	0x00,	{0x0e00, 8,  0x0002, &oper_reg_gp},		{0x007f, 0,  0x0006, &oper_imm}},		// MOV	ERn,	#imm7
 	{&instr_mov,		0x8000,	0x00,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{0x00f0, 4,  0x0001, &oper_reg_gp}},	// MOV	Rn,		Rm
@@ -69,8 +69,8 @@ static struct u8_instr u8_instr_table[] = {
 	// Shift Instructions
 	{&instr_shift,		0x800a,	0x00,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{0x00f0, 4,  0x0001, &oper_reg_gp}},	// SLL	Rn,		Rm
 	{&instr_shift,		0x900a,	0x00,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{0x0070, 4,  0x0000, &oper_imm}},		// SLL	Rn,		#width
-	{&instr_shift,		0x800b,	0x02,	{0x0f00, 8,  0x0002, &oper_reg_gp},		{0x00f0, 4,  0x0001, &oper_reg_gp}},	// SLLC	Rn,		Rm
-	{&instr_shift,		0x900b,	0x02,	{0x0f00, 8,  0x0002, &oper_reg_gp},		{0x0070, 4,  0x0000, &oper_imm}},		// SLLC	Rn,		#width
+	{&instr_shift,		0x800b,	0x02,	{0x0f00, 8,  0x0012, &oper_reg_gp},		{0x00f0, 4,  0x0001, &oper_reg_gp}},	// SLLC	Rn,		Rm
+	{&instr_shift,		0x900b,	0x02,	{0x0f00, 8,  0x0012, &oper_reg_gp},		{0x0070, 4,  0x0000, &oper_imm}},		// SLLC	Rn,		#width
 	{&instr_shift,		0x800e,	0x05,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{0x00f0, 4,  0x0001, &oper_reg_gp}},	// SRA	Rn,		Rm
 	{&instr_shift,		0x900e,	0x05,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{0x0070, 4,  0x0000, &oper_imm}},		// SRA	Rn,		#width
 	{&instr_shift,		0x800c,	0x01,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{0x00f0, 4,  0x0001, &oper_reg_gp}},	// SRL	Rn,		Rm
@@ -187,9 +187,9 @@ static struct u8_instr u8_instr_table[] = {
 
 	// Branch Instructions
 	{&instr_b,			0xf000,	0x00,	{0x0f00, 8,  0x0000, &oper_imm},		{0x0000, 0,  0x0100, &oper_mem}},		// B	Cadr
-	{&instr_b,			0xf002,	0x00,	{0x0000, 0,  0x0015, &oper_reg_ctrl},	{0x0e00, 8,  0x0002, &oper_mem}},		// B	ERn
+	{&instr_b,			0xf002,	0x00,	{0x0000, 0,  0x0015, &oper_reg_ctrl},	{0x00e0, 4,  0x0002, &oper_mem}},		// B	ERn
 	{&instr_bl,			0xf001,	0x00,	{0x0f00, 8,  0x0000, &oper_imm},		{0x0000, 0,  0x0100, &oper_mem}},		// BL	Cadr
-	{&instr_bl,			0xf003,	0x00,	{0x0000, 0,  0x0015, &oper_reg_ctrl},	{0x0e00, 8,  0x0002, &oper_mem}},		// BL	ERn
+	{&instr_bl,			0xf003,	0x00,	{0x0000, 0,  0x0015, &oper_reg_ctrl},	{0x00e0, 4,  0x0002, &oper_mem}},		// BL	ERn
 
 	// Multiplication and Division Instructions
 	{&instr_mul,		0xf004,	0x00,	{0x0e00, 8,  0x0002, &oper_reg_gp},		{0x00f0, 4,  0x0001, &oper_reg_gp}},	// MUL	ERn,	Rm
@@ -221,7 +221,7 @@ struct u8_instr *u8_decode(uint16_t instr) {
 
 /* Operand Handlers */
 struct u8_oper oper_reg_gp(struct u8_sim_ctx *ctx, struct u8_instr_oper *oper, uint32_t val) {
-	return (struct u8_oper){.type=OPER_REG_GP, .size=oper->flags, .reg=val};
+	return (struct u8_oper){.type=OPER_REG_GP, .size=oper->flags & 0xf, .reg=(val - (oper->flags >> 4)) & 0x0f};
 }
 
 struct u8_oper oper_reg_ctrl(struct u8_sim_ctx *ctx, struct u8_instr_oper *oper, uint32_t val) {
@@ -240,7 +240,7 @@ struct u8_oper oper_mem(struct u8_sim_ctx *ctx, struct u8_instr_oper *oper, uint
 	// Sign extension for displacement
 	uint8_t sext = (oper->flags & 0x00f0) >> 4;
 	if (sext != 0 && (val >> sext) & 1) {
-		disp |= 0xFFFF << sext;
+		disp |= (-1) << sext;
 	}
 
 	// Get register from which offset is taken

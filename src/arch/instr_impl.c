@@ -1,3 +1,4 @@
+#include <curses.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -169,9 +170,10 @@ void instr_shift(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0, str
 	uint64_t val = oper_read(ctx, op0);
 	uint64_t shift = oper_read(ctx, op1);
 
-	// Lower bits for continued shifts
-	uint64_t lower_mask = (1 << (op0->size - 1) * 8) - 1;
-	uint64_t val_lower = val & (lower_mask);
+	// Bits that don't change during continued shifts
+	uint64_t keep_mask = (1 << (op0->size - 1) * 8) - 1;
+	if (flags & 1) keep_mask ^= -1;
+	uint64_t keep = val & keep_mask;
 
 	// Is this an arithmetic shift?
 	if (flags & 4) {
@@ -198,10 +200,10 @@ void instr_shift(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0, str
 
 	ctx->regs.psw = psw;
 
-	// This is a continued shift, keep lower bytes unchanged
+	// This is a continued shift, keep some bits
 	if (flags & 2) {
-		val &= (0xFFFFFFFF ^ lower_mask);
-		val |= val_lower;
+		val &= -1 ^ keep_mask;
+		val |= keep;
 	}
 
 	oper_write(ctx, op0, val);
@@ -256,7 +258,7 @@ void instr_xor(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0, struc
 
 // DSR Prefix Instruction
 void instr_dsr(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0, struct u8_oper *op1) {
-	ctx->cur_dsr = oper_read(ctx ,op0);
+	ctx->cur_dsr = oper_read(ctx, op0);
 
 	u8_step(ctx);
 
@@ -278,7 +280,7 @@ void instr_store(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0, str
 
 // Push/Pop Instructions
 void instr_push(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0, struct u8_oper *op1) {
-	ctx->regs.sp -= op0->size;
+	ctx->regs.sp -= (op0->size == 1) ? 2 : op0->size;
 	write_mem_data(ctx, ctx->cur_dsr, ctx->regs.sp, op0->size, oper_read(ctx, op0));
 }
 
@@ -293,7 +295,7 @@ void instr_push_list(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0,
 	}
 
 	if (list & 0x4) { // EPSW
-		ctx->regs.sp -= 1;
+		ctx->regs.sp -= 2;
 		write_mem_data(ctx, ctx->cur_dsr, ctx->regs.sp, 1, ctx->regs.epsw[ctx->regs.psw & 3]);
 	}
 
@@ -312,7 +314,7 @@ void instr_push_list(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0,
 
 void instr_pop(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0, struct u8_oper *op1) {
 	oper_write(ctx, op0, read_mem_data(ctx, ctx->cur_dsr, ctx->regs.sp, op0->size));
-	ctx->regs.sp += op0->size;
+	ctx->regs.sp += (op0->size == 1) ? 2 : op0->size;
 }
 
 void instr_pop_list(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0, struct u8_oper *op1) {
@@ -332,7 +334,7 @@ void instr_pop_list(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0, 
 
 	if (list & 0x4) { // PSW
 		ctx->regs.psw = read_mem_data(ctx, ctx->cur_dsr, ctx->regs.sp, 1);
-		ctx->regs.sp += 1;
+		ctx->regs.sp += 2;
 	}
 
 	if (list & 0x2) { // PC
@@ -381,7 +383,33 @@ void instr_daa(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0, struc
 }
 
 void instr_das(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0, struct u8_oper *op1) {
-	INSTR_NOT_IMPL(arch, "DAS");
+	uint64_t val = oper_read(ctx, op0);
+
+	bool c = (ctx->regs.psw & 0x80) >> 7;
+	bool hc = (ctx->regs.psw & 0x4) >> 2;
+
+	uint8_t psw = ctx->regs.psw & 0b00011011;
+
+	if (hc || (val & 0x0f) > 0x09) {
+		val -= 0x06;
+	} else {
+		psw |= 1 << 2;
+	}
+
+	if (c || (val & 0xf0) > 0x90) {
+		val -= 0x60;
+	} else {
+		psw |= 1 << 7;
+	}
+
+	val &= 0xff;
+
+	psw |= (val == 0) << 6;
+	psw |= (val >> 7) << 5;
+
+	ctx->regs.psw = psw;
+
+	oper_write(ctx, op0, val);
 }
 
 void instr_neg(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0, struct u8_oper *op1) {

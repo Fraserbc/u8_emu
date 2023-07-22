@@ -1,3 +1,4 @@
+#include <curses.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -134,14 +135,36 @@ int main(int argc, char **argv) {
 	int count = 0;
 
 	FILE *log_file = fopen("sim.log", "w");
+	ctx->log_file = log_file;
+
+	bool log = false;
+
 	while (true) {
 		// Log the PCs to a file
-		/*fprintf(log_file, "ADDR: %04x\n", ctx->regs.pc);
-		for (int i = 0; i < 16; i++) fprintf(log_file, "%02x ", ctx->regs.gp[i]);
-		fprintf(log_file, "\nPSW: %02x\n", ctx->regs.psw);
-		fflush(log_file);*/
+		/*if (log) {
+			fprintf(log_file, "ADDR: %x:%04x SP: %04x\n", ctx->regs.csr, ctx->regs.pc, ctx->regs.sp);
+			fprintf(log_file, "REGS: ");
+			for (int i = 0; i < 16; i++) fprintf(log_file, "%02x ", ctx->regs.gp[i]);
+			fprintf(log_file, "\nSTACK: ");
+			for (int i = 0; i < 24; i++) fprintf(log_file, "%02x ", read_mem_data(ctx, 0, ctx->regs.sp + i, 1));
+			fprintf(log_file, "\n");
+			
+			fprintf(log_file, "%s SP @ %x:%04x\n", ctx->regs.sp & 1 ? "Unaligned" : "Aligned", ctx->regs.csr, ctx->regs.pc);
+
+			fflush(log_file);
+		}*/
 
 		if (ctx->regs.pc == 0xFFFF) break;
+
+		//if (ctx->regs.pc == 0xb3e0) ctx->regs.pc = 0xb41a;
+
+		if (ctx->regs.pc == 0xb404) {
+			wprintw(ctx->periph.cons_win, "Keycode: %02x\n", read_reg_r(ctx, 0));
+			wrefresh(ctx->periph.cons_win);
+		}
+
+		//if (ctx->regs.pc == 0x7142) log = true;
+		//if (ctx->regs.pc == 0x71a6) log = false;
 
 		// Hook the render function
 		if (ctx->regs.pc == 0x2ec0 || count % 1000 == 0) render(ctx, ctx->periph.lcd_win);
