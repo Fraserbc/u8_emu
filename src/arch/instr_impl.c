@@ -27,56 +27,58 @@ void psw_set_zs(struct u8_sim_ctx *ctx, uint8_t size, uint64_t val) {
 
 uint64_t add_impl(uint64_t val0, uint64_t val1, size_t size, uint8_t *flags) {
 	// Full add
-	uint64_t full_add = val0 + val1;
-	bool carry = full_add >> (size * 8);
-	full_add &= (1 << (size * 8)) - 1;
-	bool zero = (full_add == 0);
+	uint64_t full = val0 + val1;
+	bool carry = full >> (size * 8);
+	full &= (1 << (size * 8)) - 1;
+	bool zero = (full == 0);
 
 	uint8_t s_bit = size * 8 - 1;			// Sign bit
-	bool sign = (full_add >> s_bit);
+	bool sign = (full >> s_bit);
 
-	bool oflow = (val0 >> s_bit) == (val1 >> s_bit) ? (val0 >> s_bit) != (full_add >> s_bit) : 0;
+	bool oflow = (val0 >> s_bit) == (val1 >> s_bit) ? (val0 >> s_bit) != (full >> s_bit) : 0;
 
 	// Half add
 	uint8_t hc_bit = (size * 8) - 4;
 	uint64_t hc_mask = (1 << hc_bit) - 1;
-	uint64_t half_add = (val0 & hc_mask) + (val1 & hc_mask);
+	uint64_t half = (val0 & hc_mask) + (val1 & hc_mask);
 
-	bool hc = (half_add >> hc_bit);
+	bool hc = (half >> hc_bit);
 
 	// Set flags
 	*flags = (carry << 7) | (zero << 6) | (sign << 5) | (oflow << 4) | (hc << 2);
 
-	return full_add;
+	return full;
 }
 
 uint64_t sub_impl(uint64_t val0, uint64_t val1, size_t size, uint8_t *flags) {
-	// Invert val1
-	val1 ^= -1;
-	val1 += 1;
+	// Full sub
+	uint64_t full = val0 - val1;
+	uint64_t sign_nt = full >> (size * 8);
 
-	// Full add
-	uint64_t full_add = val0 + val1;
-	bool carry = full_add >> (size * 8);
-	full_add &= (1 << (size * 8)) - 1;
-	bool zero = (full_add == 0);
+	full &= (1 << (size * 8)) - 1;
+
+	bool zero = full == 0;
 
 	uint8_t s_bit = size * 8 - 1;			// Sign bit
-	bool sign = (full_add >> s_bit);
+	bool sign = full >> s_bit;
 
-	bool oflow = (val0 >> s_bit) == (val1 >> s_bit) ? (val0 >> s_bit) != (full_add >> s_bit) : 0;
+	bool borrow = val1 > val0;
 
-	// Half add
+	sign_nt += sign;
+	sign_nt &= -1 >> (size * 8);
+
+	bool oflow = sign_nt != 0;
+
+	// Half sub
 	uint8_t hc_bit = (size * 8) - 4;
 	uint64_t hc_mask = (1 << hc_bit) - 1;
-	uint64_t half_add = (val0 & hc_mask) + (val1 & hc_mask);
 
-	bool hc = (val1 & hc_mask) == 0 ? 0 : (half_add >> hc_bit) ^ 1;
+	bool hc = (val1 & hc_mask) > (val0 & hc_mask);
 
 	// Set flags
-	*flags = (carry << 7) | (zero << 6) | (sign << 5) | (oflow << 4) | (hc << 2);
+	*flags = (borrow << 7) | (zero << 6) | (sign << 5) | (oflow << 4) | (hc << 2);
 
-	return full_add;
+	return full;
 }
 
 // Arithmetic Instructions

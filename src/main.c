@@ -18,9 +18,9 @@ void braille(char *s, uint8_t c) {
 	s[2] = 0b10000000 | (c & 0b00111111);
 }
 
-void render(struct u8_sim_ctx *ctx, WINDOW *win) {
+void render(struct u8_sim_ctx *ctx) {
 	for (int y = 0; y < 8; y++) {
-		wmove(win, y, 0);
+		wmove(ctx->periph.lcd_win, y, 0);
 		for (int x = 0; x < 48; x++) {
 			// Get the pixels
 			uint8_t pixels[8];
@@ -40,11 +40,11 @@ void render(struct u8_sim_ctx *ctx, WINDOW *win) {
 
 			char buf[4] = {'\0'};
 			braille(buf, val);
-			wprintw(win, "%s", buf);
+			wprintw(ctx->periph.lcd_win, "%s", buf);
 		}
 	}
 
-	wrefresh(win);
+	wrefresh(ctx->periph.lcd_win);
 }
 
 uint8_t rom_window(struct u8_sim_ctx *ctx, uint8_t seg, uint16_t offset) {
@@ -122,20 +122,15 @@ int main(int argc, char **argv) {
 	// Initialise peripherals
 	init_periph(ctx);
 
-	// Controls writing to buffer or real screen
-	/*write_mem_data(ctx, 0, 0x811d, 1, 1);
-
-	write_mem_data(ctx, 0, 0x8e00, 1, 1);*/
-
 	// Set PC and SP
-	ctx->regs.pc = read_mem_data(ctx, 0, 0x0002, 2);
 	ctx->regs.sp = read_mem_data(ctx, 0, 0x0002, 0);
+	ctx->regs.pc = read_mem_data(ctx, 0, 0x0002, 2);
 
-	int count = 0;
-
+	// Open the log file
 	FILE *log_file = fopen("sim.log", "w");
 	ctx->log_file = log_file;
 
+	int count = 0;
 	while (true) {
 		// Log the PCs to a file
 		/*fprintf(log_file, "ADDR: %x:%04x SP: %04x PSW %04x\n", ctx->regs.csr, ctx->regs.pc, ctx->regs.sp, ctx->regs.psw);
@@ -148,7 +143,7 @@ int main(int argc, char **argv) {
 
 		fflush(log_file);*/
 
-		if (ctx->regs.csr == 0x01 && ctx->regs.pc == 0x86d0) {
+		if (ctx->regs.csr == 0x01 && ctx->regs.pc == 0x8c64) {
 			wprintw(ctx->periph.cons_win, "REG 0: ");
 			for (int x = 0; x < 0xB; x++) wprintw(ctx->periph.cons_win, "%02x ", read_mem_data(ctx, 0, 0x8000 + x, 1));
 			wprintw(ctx->periph.cons_win, "\nREG 1: ");
@@ -158,8 +153,9 @@ int main(int argc, char **argv) {
 		}
 
 		if(ctx->regs.csr == 0x01 && ctx->regs.pc >= 0x89a0 && ctx->regs.pc <= 0x89cc) {
-			wprintw(ctx->periph.cons_win, "%016lx %016lx SW %02x\n", read_reg_qr(ctx, 0), read_reg_qr(ctx, 8), ctx->regs.psw);
+			wprintw(ctx->periph.cons_win, "%04x %016lx %016lx %02x\n", ctx->regs.pc, read_reg_qr(ctx, 0), read_reg_qr(ctx, 8), ctx->regs.psw);
 			wrefresh(ctx->periph.cons_win);
+			getch();
 		}
 
 		/*if (count % 10000 == 0) {
@@ -176,7 +172,7 @@ int main(int argc, char **argv) {
 		}*/
 
 		// Hook the render function
-		if (ctx->regs.pc == 0x2ec0 || count % 1000 == 0) render(ctx, ctx->periph.lcd_win);
+		if (ctx->regs.pc == 0x2ec0 || count % 1000 == 0) render(ctx);
 		count++;
 
 		update_keyboard(ctx);
@@ -184,14 +180,15 @@ int main(int argc, char **argv) {
 		u8_step(ctx);
 	}
 
+	render(ctx);
+
 	wprintw(ctx->periph.cons_win, "Emulator exited cleanly\n");
 	wrefresh(ctx->periph.cons_win);
 
-	//fflush(log_file);
-	//fclose(log_file);
+	fflush(log_file);
+	fclose(log_file);
 
-	while(1) {}
-	while (getch() == ERR) {}
+	while (getch() != KEY_ENTER) {}
 
 	endwin();
 
