@@ -97,9 +97,7 @@ void instr_das(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0, struc
 void instr_neg(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0, struct u8_oper *op1);
 
 // Bit Access Instructions
-void instr_sb(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0, struct u8_oper *op1);
-void instr_rb(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0, struct u8_oper *op1);
-void instr_tb(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0, struct u8_oper *op1);
+void instr_bit(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0, struct u8_oper *op1);
 
 // PSW Access Instructions
 void instr_ei(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0, struct u8_oper *op1);

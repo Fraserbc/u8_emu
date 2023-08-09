@@ -161,12 +161,12 @@ static struct u8_instr u8_instr_table[] = {
 	{&instr_neg,		0x805f,	0x00,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{.handler = NULL}},						// NEG	Rn
 
 	// Bit Access Instructions
-	{&instr_sb,			0xa000,	0x00,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{0x0070, 4,  0x0000, &oper_imm}},		// SB	Rn.bit_offset
-	{&instr_sb,			0xa080,	0x00,	{0x0000, 0,  0x0100, &oper_mem},		{0x0070, 4,  0x0000, &oper_imm}},		// SB	Dadr.bit_offset
-	{&instr_rb,			0xa002,	0x00,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{0x0070, 4,  0x0000, &oper_imm}},		// RB	Rn.bit_offset
-	{&instr_rb,			0xa082,	0x00,	{0x0000, 0,  0x0100, &oper_mem},		{0x0070, 4,  0x0000, &oper_imm}},		// RB	Dadr.bit_offset
-	{&instr_tb,			0xa001,	0x00,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{0x0070, 4,  0x0000, &oper_imm}},		// TB	Rn.bit_offset
-	{&instr_tb,			0xa081,	0x00,	{0x0000, 0,  0x0100, &oper_mem},		{0x0070, 4,  0x0000, &oper_imm}},		// TB	Dadr.bit_offset
+	{&instr_bit,		0xa000,	0x01,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{0x0070, 4,  0x0000, &oper_imm}},		// SB	Rn.bit_offset
+	{&instr_bit,		0xa080,	0x01,	{0x0000, 0,  0x0100, &oper_mem},		{0x0070, 4,  0x0000, &oper_imm}},		// SB	Dadr.bit_offset
+	{&instr_bit,		0xa002,	0x02,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{0x0070, 4,  0x0000, &oper_imm}},		// RB	Rn.bit_offset
+	{&instr_bit,		0xa082,	0x02,	{0x0000, 0,  0x0100, &oper_mem},		{0x0070, 4,  0x0000, &oper_imm}},		// RB	Dadr.bit_offset
+	{&instr_bit,		0xa001,	0x00,	{0x0f00, 8,  0x0001, &oper_reg_gp},		{0x0070, 4,  0x0000, &oper_imm}},		// TB	Rn.bit_offset
+	{&instr_bit,		0xa081,	0x00,	{0x0000, 0,  0x0100, &oper_mem},		{0x0070, 4,  0x0000, &oper_imm}},		// TB	Dadr.bit_offset
 
 	// PSW Access Instructions
 	{&instr_ei,			0xed08,	0x00,	{.handler = NULL},						{.handler = NULL}},						// EI

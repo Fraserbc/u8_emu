@@ -143,7 +143,7 @@ int main(int argc, char **argv) {
 
 		fflush(log_file);*/
 
-		if (ctx->regs.csr == 0x01 && ctx->regs.pc == 0x8c64) {
+		/*if (ctx->regs.csr == 0x01 && ctx->regs.pc == 0x8c64) {
 			wprintw(ctx->periph.cons_win, "REG 0: ");
 			for (int x = 0; x < 0xB; x++) wprintw(ctx->periph.cons_win, "%02x ", read_mem_data(ctx, 0, 0x8000 + x, 1));
 			wprintw(ctx->periph.cons_win, "\nREG 1: ");
@@ -155,8 +155,17 @@ int main(int argc, char **argv) {
 		if(ctx->regs.csr == 0x01 && ctx->regs.pc >= 0x89a0 && ctx->regs.pc <= 0x89cc) {
 			wprintw(ctx->periph.cons_win, "%04x %016lx %016lx %02x\n", ctx->regs.pc, read_reg_qr(ctx, 0), read_reg_qr(ctx, 8), ctx->regs.psw);
 			wrefresh(ctx->periph.cons_win);
-			getch();
+			//getch();
+		}*/
+
+		if (ctx->regs.csr == 0x01 && ctx->regs.pc == 0x8472) {
+				/*wprintw(ctx->periph.cons_win, "REG: ");
+				for (int x = 0; x < 0xA; x++) wprintw(ctx->periph.cons_win, "%02x ", read_mem_data(ctx, 0, ctx->regs.sp + 10 + x, 1));*/
+				wprintw(ctx->periph.cons_win, "r0: %02x\n", read_reg_r(ctx, 0));
+				wrefresh(ctx->periph.cons_win);
 		}
+
+		//if (ctx->regs.pc == 0x3c52) break;
 
 		/*if (count % 10000 == 0) {
 			for (int i = 0; i < 10; i++) wprintw(ctx->periph.cons_win, "%02x ", read_mem_data(ctx, 0, 0x8230 + i, 1));
@@ -188,7 +197,7 @@ int main(int argc, char **argv) {
 	fflush(log_file);
 	fclose(log_file);
 
-	while (getch() != KEY_ENTER) {}
+	while (getch() != '\n') {}
 
 	endwin();
 
