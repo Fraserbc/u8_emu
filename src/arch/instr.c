@@ -240,7 +240,7 @@ struct u8_oper oper_mem(struct u8_sim_ctx *ctx, struct u8_instr_oper *oper, uint
 	// Sign extension for displacement
 	uint8_t sext = (oper->flags & 0x00f0) >> 4;
 	if (sext != 0 && (val >> sext) & 1) {
-		disp |= (-1) << sext;
+		disp |= (uint64_t)(-1) << sext;
 	}
 
 	// Get register from which offset is taken

@@ -123,7 +123,7 @@ int main(int argc, char **argv) {
 	init_periph(ctx);
 
 	// Set PC and SP
-	ctx->regs.sp = read_mem_data(ctx, 0, 0x0002, 0);
+	ctx->regs.sp = read_mem_data(ctx, 0, 0x0000, 2);
 	ctx->regs.pc = read_mem_data(ctx, 0, 0x0002, 2);
 
 	// Open the log file
@@ -158,12 +158,45 @@ int main(int argc, char **argv) {
 			//getch();
 		}*/
 
-		if (ctx->regs.csr == 0x01 && ctx->regs.pc == 0x8472) {
-				/*wprintw(ctx->periph.cons_win, "REG: ");
-				for (int x = 0; x < 0xA; x++) wprintw(ctx->periph.cons_win, "%02x ", read_mem_data(ctx, 0, ctx->regs.sp + 10 + x, 1));*/
-				wprintw(ctx->periph.cons_win, "r0: %02x\n", read_reg_r(ctx, 0));
+		if (ctx->regs.csr == 0x01 && ctx->regs.pc == 0x83d6) {
+				wprintw(ctx->periph.cons_win, "\nNext digit (%x):", read_reg_r(ctx, 1));
 				wrefresh(ctx->periph.cons_win);
 		}
+
+		if (ctx->regs.csr == 0x01 && ctx->regs.pc == 0x83f0) {
+				wprintw(ctx->periph.cons_win, " %02x", read_reg_r(ctx, 2));
+				wrefresh(ctx->periph.cons_win);
+		}
+
+		if (ctx->regs.csr == 0x01 && ctx->regs.pc == 0x8414) wprintw(ctx->periph.cons_win, "E");
+		if (ctx->regs.csr == 0x01 && ctx->regs.pc == 0x83F8) wprintw(ctx->periph.cons_win, "G");
+		if (ctx->regs.csr == 0x01 && ctx->regs.pc == 0x8456) wprintw(ctx->periph.cons_win, "O");
+		if (ctx->regs.csr == 0x01 && ctx->regs.pc == 0x8436) wprintw(ctx->periph.cons_win, "T");
+
+		if (ctx->regs.csr == 0x01 && ctx->regs.pc == 0x84d0) {
+			fprintf(ctx->log_file, "%016lx,%016lx,", read_reg_qr(ctx, 0), read_reg_qr(ctx, 8));
+			fflush(ctx->log_file);
+		}
+
+		if (ctx->regs.csr == 0x01 && ctx->regs.pc == 0x84f2) {
+			fprintf(ctx->log_file, "%016lx\n", read_reg_qr(ctx, 0));
+			fflush(ctx->log_file);
+		}
+
+		/*if (ctx->regs.csr == 0x00 && ctx->regs.pc == 0x2be4 && (read_reg_er(ctx, 2) == 0xffcc)) {
+				wprintw(ctx->periph.cons_win, "What??? %x%04x\n", ctx->regs.lcsr, ctx->regs.lr);
+				wrefresh(ctx->periph.cons_win);
+		}
+
+		if (ctx->regs.csr == 0x00 && ctx->regs.pc == 0x2bfc) {
+				wprintw(ctx->periph.cons_win, "HIT: %04x\n", read_reg_er(ctx, 2));
+				wrefresh(ctx->periph.cons_win);
+		}
+
+		if (ctx->regs.csr == 0x00 && ctx->regs.pc == 0x2c0a && ctx->regs.gp[2] == 0xd0) {
+				wprintw(ctx->periph.cons_win, "%04x\n", read_reg_er(ctx, 10));
+				wrefresh(ctx->periph.cons_win);
+		}*/
 
 		//if (ctx->regs.pc == 0x3c52) break;
 
