@@ -183,6 +183,16 @@ int main(int argc, char **argv) {
 			fflush(ctx->log_file);
 		}
 
+		if (ctx->regs.csr == 0x00 && ctx->regs.pc == 0x4ffa) {
+			wprintw(ctx->periph.cons_win, "Here! er0: %04x psw: %02x\n", read_reg_er(ctx, 0), ctx->regs.psw);
+			wrefresh(ctx->periph.cons_win);
+		}
+
+		if (ctx->regs.csr == 0x00 && ctx->regs.pc == 0x28e0) {
+			wprintw(ctx->periph.cons_win, "LR %x%04x Char: %02x\n", ctx->regs.lcsr, ctx->regs.lr, read_reg_r(ctx, 0));
+			wrefresh(ctx->periph.cons_win);
+		}
+
 		/*if (ctx->regs.csr == 0x00 && ctx->regs.pc == 0x2be4 && (read_reg_er(ctx, 2) == 0xffcc)) {
 				wprintw(ctx->periph.cons_win, "What??? %x%04x\n", ctx->regs.lcsr, ctx->regs.lr);
 				wrefresh(ctx->periph.cons_win);

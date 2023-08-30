@@ -159,13 +159,13 @@ void instr_cmp(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0, struc
 void instr_cmpc(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0, struct u8_oper *op1) {
 	uint64_t mask = (1 << 8 * op0->size) - 1;
 
-	uint64_t val0 = oper_read(ctx, op0) & mask;
-	uint64_t val1 = oper_read(ctx, op1) & mask;
-
 	bool carry = ctx->regs.psw >> 7;
 
+	uint64_t val0 = oper_read(ctx, op0) & mask;
+	uint64_t val1 = (oper_read(ctx, op1) + carry) & mask;
+
 	uint8_t psw_new;
-	sub_impl(val0, val1 + carry, op0->size, &psw_new);
+	sub_impl(val0, val1, op0->size, &psw_new);
 
 	// Set the new flags
 	ctx->regs.psw &= (psw_new | 0b10111111) & 0b01001011;
