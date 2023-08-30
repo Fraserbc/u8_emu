@@ -2,6 +2,7 @@
 #define U8_MEM_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 struct u8_sim_ctx;
 
@@ -11,12 +12,25 @@ enum u8_mem_type {
 	U8_REGION_CODE
 };
 
+enum u8_mem_access {
+	U8_MACC_ARR,
+	U8_MACC_FUNC
+};
+
 struct u8_mem_reg {
 	enum u8_mem_type type;
-	uint32_t addr_l;
-	uint32_t addr_h;
-	uint8_t (*read)(struct u8_sim_ctx *, uint8_t, uint16_t);
-	void (*write)(struct u8_sim_ctx *, uint8_t, uint16_t, uint8_t);
+	bool rw;
+	uint32_t addr_m;
+	uint32_t addr_v;
+
+	enum u8_mem_access acc;
+	union {
+		uint8_t *array;
+		struct {
+			uint8_t (*read)(struct u8_sim_ctx *, uint8_t, uint16_t);
+			void (*write)(struct u8_sim_ctx *, uint8_t, uint16_t, uint8_t);
+		};
+	};
 };
 
 struct u8_mem {

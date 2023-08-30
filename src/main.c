@@ -47,28 +47,6 @@ void render(struct u8_sim_ctx *ctx) {
 	wrefresh(ctx->periph.lcd_win);
 }
 
-uint8_t rom_window(struct u8_sim_ctx *ctx, uint8_t seg, uint16_t offset) {
-	return ctx->code_mem[(seg << 16) | offset];
-}
-
-uint8_t data_mem_read(struct u8_sim_ctx *ctx, uint8_t seg, uint16_t offset) {
-	if (seg != 0x00) return 0x00;
-	return ctx->data_mem[offset - 0x8000];
-}
-
-void data_mem_write(struct u8_sim_ctx *ctx, uint8_t seg, uint16_t offset, uint8_t val) {
-	if (seg != 0x00) return;
-	ctx->data_mem[offset - 0x8000] = val;
-}
-
-uint8_t code_mem_0(struct u8_sim_ctx *ctx, uint8_t seg, uint16_t offset) {
-	return ctx->code_mem[(seg << 16) | offset];
-}
-
-uint8_t code_mem_8(struct u8_sim_ctx *ctx, uint8_t seg, uint16_t offset) {
-	return ctx->code_mem[offset];
-}
-
 int main(int argc, char **argv) {
 	// Initialise simulator
 	struct u8_sim_ctx *ctx = malloc(sizeof(struct u8_sim_ctx));
@@ -89,35 +67,50 @@ int main(int argc, char **argv) {
 	ctx->mem.num_regions = 5;
 	ctx->mem.regions = malloc(sizeof(struct u8_mem_reg) * 5);
 
-	ctx->mem.regions[0].type = U8_REGION_BOTH;
-	ctx->mem.regions[0].addr_l = 0x00000;
-	ctx->mem.regions[0].addr_h = 0x07FFF;
-	ctx->mem.regions[0].read = &rom_window;
-	ctx->mem.regions[0].write = NULL;
+	ctx->mem.regions[0] = (struct u8_mem_reg){
+		.type = U8_REGION_BOTH,
+		.rw = false,
+		.addr_m = 0xF8000,
+		.addr_v = 0x00000,
+		.acc = U8_MACC_ARR,
+		.array = ctx->code_mem
+	};
 
-	ctx->mem.regions[1].type = U8_REGION_DATA;
-	ctx->mem.regions[1].addr_l = 0x08000;
-	ctx->mem.regions[1].addr_h = 0x0FFFF;
-	ctx->mem.regions[1].read = &data_mem_read;
-	ctx->mem.regions[1].write = &data_mem_write;
+	ctx->mem.regions[1] = (struct u8_mem_reg){
+		.type = U8_REGION_DATA,
+		.rw = true,
+		.addr_m = 0xF8000,
+		.addr_v = 0x08000,
+		.acc = U8_MACC_ARR,
+		.array = ctx->data_mem
+	};
 
-	ctx->mem.regions[2].type = U8_REGION_CODE;
-	ctx->mem.regions[2].addr_l = 0x08000;
-	ctx->mem.regions[2].addr_h = 0x0FFFF;
-	ctx->mem.regions[2].read = &code_mem_0;
-	ctx->mem.regions[2].write = NULL;
+	ctx->mem.regions[2] = (struct u8_mem_reg){
+		.type = U8_REGION_CODE,
+		.rw = false,
+		.addr_m = 0xF8000,
+		.addr_v = 0x08000,
+		.acc = U8_MACC_ARR,
+		.array = (uint8_t *)(ctx->code_mem + 0x8000)
+	};
 
-	ctx->mem.regions[3].type = U8_REGION_BOTH;
-	ctx->mem.regions[3].addr_l = 0x10000;
-	ctx->mem.regions[3].addr_h = 0x1FFFF;
-	ctx->mem.regions[3].read = &code_mem_0;
-	ctx->mem.regions[3].write = NULL;
+	ctx->mem.regions[3] = (struct u8_mem_reg){
+		.type = U8_REGION_BOTH,
+		.rw = false,
+		.addr_m = 0xF0000,
+		.addr_v = 0x10000,
+		.acc = U8_MACC_ARR,
+		.array = (uint8_t *)(ctx->code_mem + 0x10000)
+	};
 
-	ctx->mem.regions[4].type = U8_REGION_DATA;
-	ctx->mem.regions[4].addr_l = 0x80000;
-	ctx->mem.regions[4].addr_h = 0x8FFFF;
-	ctx->mem.regions[4].read = &code_mem_8;
-	ctx->mem.regions[4].write = NULL;
+	ctx->mem.regions[4] = (struct u8_mem_reg){
+		.type = U8_REGION_DATA,
+		.rw = false,
+		.addr_m = 0xF0000,
+		.addr_v = 0x80000,
+		.acc = U8_MACC_ARR,
+		.array = ctx->code_mem
+	};
 
 	// Initialise peripherals
 	init_periph(ctx);
