@@ -27,7 +27,7 @@ void render(struct u8_sim_ctx *ctx) {
 
 			for (int Py = 0; Py < 4; Py++) {
 				uint16_t offset = (y << 6) + (Py << 4) + (x >> 2);
-				uint8_t byte = read_mem_data(ctx, 0, 0xf800 + offset, 1);
+				uint8_t byte = read_mem_data(&ctx->core, 0, 0xf800 + offset, 1);
 
 				for (int Px = 0; Px < 2; Px++)	
 					pixels[(Py << 1) + Px] = byte >> (7 - (((x & 3) << 1) + Px)) & 1;
@@ -64,10 +64,10 @@ int main(int argc, char **argv) {
 	ctx->data_mem = malloc(0x8000);
 	memset(ctx->data_mem, 0, 0x8000);
 
-	ctx->mem.num_regions = 5;
-	ctx->mem.regions = malloc(sizeof(struct u8_mem_reg) * 5);
+	ctx->core.mem.num_regions = 5;
+	ctx->core.mem.regions = malloc(sizeof(struct u8_mem_reg) * 5);
 
-	ctx->mem.regions[0] = (struct u8_mem_reg){
+	ctx->core.mem.regions[0] = (struct u8_mem_reg){
 		.type = U8_REGION_BOTH,
 		.rw = false,
 		.addr_m = 0xF8000,
@@ -76,7 +76,7 @@ int main(int argc, char **argv) {
 		.array = ctx->code_mem
 	};
 
-	ctx->mem.regions[1] = (struct u8_mem_reg){
+	ctx->core.mem.regions[1] = (struct u8_mem_reg){
 		.type = U8_REGION_DATA,
 		.rw = true,
 		.addr_m = 0xF8000,
@@ -85,7 +85,7 @@ int main(int argc, char **argv) {
 		.array = ctx->data_mem
 	};
 
-	ctx->mem.regions[2] = (struct u8_mem_reg){
+	ctx->core.mem.regions[2] = (struct u8_mem_reg){
 		.type = U8_REGION_CODE,
 		.rw = false,
 		.addr_m = 0xF8000,
@@ -94,7 +94,7 @@ int main(int argc, char **argv) {
 		.array = (uint8_t *)(ctx->code_mem + 0x8000)
 	};
 
-	ctx->mem.regions[3] = (struct u8_mem_reg){
+	ctx->core.mem.regions[3] = (struct u8_mem_reg){
 		.type = U8_REGION_BOTH,
 		.rw = false,
 		.addr_m = 0xF0000,
@@ -103,7 +103,7 @@ int main(int argc, char **argv) {
 		.array = (uint8_t *)(ctx->code_mem + 0x10000)
 	};
 
-	ctx->mem.regions[4] = (struct u8_mem_reg){
+	ctx->core.mem.regions[4] = (struct u8_mem_reg){
 		.type = U8_REGION_DATA,
 		.rw = false,
 		.addr_m = 0xF0000,
@@ -116,8 +116,8 @@ int main(int argc, char **argv) {
 	init_periph(ctx);
 
 	// Set PC and SP
-	ctx->regs.sp = read_mem_data(ctx, 0, 0x0000, 2);
-	ctx->regs.pc = read_mem_data(ctx, 0, 0x0002, 2);
+	ctx->core.regs.sp = read_mem_data(&ctx->core, 0, 0x0000, 2);
+	ctx->core.regs.pc = read_mem_data(&ctx->core, 0, 0x0002, 2);
 
 	// Open the log file
 	FILE *log_file = fopen("sim.log", "w");
@@ -217,12 +217,12 @@ int main(int argc, char **argv) {
 		}*/
 
 		// Hook the render function
-		if (ctx->regs.pc == 0x2ec0 || count % 1000 == 0) render(ctx);
+		if (ctx->core.regs.pc == 0x2ec0 || count % 1000 == 0) render(ctx);
 		count++;
 
 		update_keyboard(ctx);
 
-		u8_step(ctx);
+		u8_step(&ctx->core);
 	}
 
 	render(ctx);

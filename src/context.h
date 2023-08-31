@@ -4,14 +4,13 @@
 #include <stdio.h>
 #include <stdint.h>
 
+#include "core/core.h"
 #include "core/regs.h"
 #include "core/mem.h"
 #include "peripheral.h"
 
 struct u8_sim_ctx {
-	struct u8_regs regs;
-	uint8_t cur_dsr;
-	struct u8_mem mem;
+	struct u8_core core;
 	struct u8_periph periph;
 
 	uint8_t *code_mem;

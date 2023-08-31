@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-struct u8_sim_ctx;
+struct u8_core;
 
 /* CPU Registers */
 struct u8_regs {
@@ -22,17 +22,17 @@ struct u8_regs {
 };
 
 /* Register Access */
-uint64_t read_reg(struct u8_sim_ctx *ctx, uint8_t reg, uint8_t size) ;
-void write_reg(struct u8_sim_ctx *ctx, uint8_t reg, uint8_t size, uint64_t val);
+uint64_t read_reg(struct u8_core *core, uint8_t reg, uint8_t size) ;
+void write_reg(struct u8_core *core, uint8_t reg, uint8_t size, uint64_t val);
 
-uint8_t read_reg_r(struct u8_sim_ctx *ctx, uint8_t reg);
-uint16_t read_reg_er(struct u8_sim_ctx *ctx, uint8_t reg);
-uint32_t read_reg_xr(struct u8_sim_ctx *ctx, uint8_t reg);
-uint64_t read_reg_qr(struct u8_sim_ctx *ctx, uint8_t reg);
+uint8_t read_reg_r(struct u8_core *core, uint8_t reg);
+uint16_t read_reg_er(struct u8_core *core, uint8_t reg);
+uint32_t read_reg_xr(struct u8_core *core, uint8_t reg);
+uint64_t read_reg_qr(struct u8_core *core, uint8_t reg);
 
-void write_reg_r(struct u8_sim_ctx *ctx, uint8_t reg, uint8_t val);
-void write_reg_er(struct u8_sim_ctx *ctx, uint8_t reg, uint16_t val);
-void write_reg_xr(struct u8_sim_ctx *ctx, uint8_t reg, uint32_t val);
-void write_reg_qr(struct u8_sim_ctx *ctx, uint8_t reg, uint64_t val);
+void write_reg_r(struct u8_core *core, uint8_t reg, uint8_t val);
+void write_reg_er(struct u8_core *core, uint8_t reg, uint16_t val);
+void write_reg_xr(struct u8_core *core, uint8_t reg, uint32_t val);
+void write_reg_qr(struct u8_core *core, uint8_t reg, uint64_t val);
 
 #endif

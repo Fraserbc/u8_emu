@@ -11,7 +11,7 @@ struct keypad_key {
 	uint8_t ki, ko;
 };
 
-struct keypad_key keys[] ={
+struct keypad_key keys[] = {
 	{0,   0, 6,   2, "Shift", 0x80, 0x01},	// Shift
 	{7,   0, 13,  2, "Alpha", 0x80, 0x02},	// Alpha
 	{18,  0, 24,  3, "Up",    0x80, 0x04},	// Up
@@ -155,11 +155,11 @@ void init_periph(struct u8_sim_ctx *ctx) {
 
 uint8_t last_ready = 0;
 void update_keyboard(struct u8_sim_ctx *ctx) {
-	uint8_t ready = read_mem_data(ctx, 0, 0x8e00, 1);
+	uint8_t ready = read_mem_data(&ctx->core, 0, 0x8e00, 1);
 
 	if ((last_ready == 0) && (ready == 1)) {
-		write_mem_data(ctx, 0, 0x8e01, 1, 0);
-		write_mem_data(ctx, 0, 0x8e02, 1, 0);
+		write_mem_data(&ctx->core, 0, 0x8e01, 1, 0);
+		write_mem_data(&ctx->core, 0, 0x8e02, 1, 0);
 	}
 
 	last_ready = ready;
@@ -174,8 +174,8 @@ void update_keyboard(struct u8_sim_ctx *ctx) {
 				if (wmouse_trafo(ctx->periph.keypad_win, &y, &x, false)) {
 					for (int i = 0; i < NUM_KEYS; i++)
 						if ((x >= keys[i].x0) && (x <= keys[i].x1) && (y >= keys[i].y0) && (y <= keys[i].y1)) {
-							write_mem_data(ctx, 0, 0x8e01, 1, keys[i].ki);
-							write_mem_data(ctx, 0, 0x8e02, 1, keys[i].ko);
+							write_mem_data(&ctx->core, 0, 0x8e01, 1, keys[i].ki);
+							write_mem_data(&ctx->core, 0, 0x8e02, 1, keys[i].ko);
 						}
 				}
 			}

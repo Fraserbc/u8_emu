@@ -3,6 +3,8 @@
 
 #include <ncurses.h>
 
+struct u8_sim_ctx;
+
 struct u8_periph {
 	WINDOW *lcd_win;
 	WINDOW *keypad_win;
