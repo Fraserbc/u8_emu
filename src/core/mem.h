@@ -44,6 +44,4 @@ void write_mem_data(struct u8_core *core, uint8_t dsr, uint16_t offset, uint8_t 
 uint64_t read_mem_code(struct u8_core *core, uint8_t csr, uint16_t offset, uint8_t size);
 void write_mem_code(struct u8_core *core, uint8_t csr, uint16_t offset, uint8_t size, uint64_t val);
 
-void init_mem(uint8_t *code);
-
 #endif
