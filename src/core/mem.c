@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#include "context.h"
+#include "../context.h"
 #include "mem.h"
 
 uint64_t access_mem(struct u8_sim_ctx *ctx, uint8_t seg, uint16_t offset, uint8_t size, enum u8_mem_type type, bool rw, uint64_t val) {

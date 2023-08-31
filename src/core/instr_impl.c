@@ -3,12 +3,13 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include "../context.h"
-#include "../mem.h"
-#include "arch.h"
+#include "core.h"
 #include "instr.h"
+#include "mem.h"
 
-#define INSTR_NOT_IMPL(arch, name) printf("ERR: '%s' not implemented @ %04x\n", name, ctx->regs.pc); exit(0)
+#include "../context.h"
+
+#define INSTR_NOT_IMPL(name) printf("ERR: '%s' not implemented @ %04x\n", name, ctx->regs.pc); exit(0)
 
 // Common psw update routines
 void psw_set_zs(struct u8_sim_ctx *ctx, uint8_t size, uint64_t val) {
@@ -606,11 +607,11 @@ void instr_extbw(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0, str
 
 // Software Interrupt Instructions
 void instr_swi(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0, struct u8_oper *op1) {
-	INSTR_NOT_IMPL(arch, "SWI");
+	INSTR_NOT_IMPL("SWI");
 }
 
 void instr_brk(struct u8_sim_ctx *ctx, uint8_t flags, struct u8_oper *op0, struct u8_oper *op1) {
-	INSTR_NOT_IMPL(arch, "BRK");
+	INSTR_NOT_IMPL("BRK");
 }
 
 // Branch Instructions

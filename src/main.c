@@ -8,9 +8,9 @@
 #include <memory.h>
 
 #include "context.h"
-#include "mem.h"
-#include "arch/arch.h"
-#include "arch/regs.h"
+#include "core/core.h"
+#include "core/mem.h"
+#include "core/regs.h"
 
 void braille(char *s, uint8_t c) {
 	s[0] = 0b11100010;

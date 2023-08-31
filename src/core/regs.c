@@ -1,7 +1,8 @@
 #include <stdint.h>
 
-#include "../context.h"
 #include "regs.h"
+
+#include "../context.h"
 
 /* Register Access */
 uint64_t read_reg(struct u8_sim_ctx *ctx, uint8_t reg, uint8_t size) {

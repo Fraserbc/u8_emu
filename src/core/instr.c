@@ -1,9 +1,11 @@
 #include <stdio.h>
 
-#include "../context.h"
-#include "arch.h"
-#include "regs.h"
+
+#include "core.h"
 #include "instr.h"
+#include "regs.h"
+
+#include "../context.h"
 
 /*
 * TODO: Implement coprocessor stuff

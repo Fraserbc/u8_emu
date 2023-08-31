@@ -1,7 +1,7 @@
-#include "arch.h"
+#include "core.h"
 #include "instr.h"
+#include "mem.h"
 #include "../context.h"
-#include "../mem.h"
 
 #include <stdio.h>
 

@@ -2,7 +2,7 @@
 #include <locale.h>
 
 #include "context.h"
-#include "arch/regs.h"
+#include "core/regs.h"
 #include "peripheral.h"
 
 struct keypad_key {

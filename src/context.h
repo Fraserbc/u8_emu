@@ -4,8 +4,8 @@
 #include <stdio.h>
 #include <stdint.h>
 
-#include "arch/regs.h"
-#include "mem.h"
+#include "core/regs.h"
+#include "core/mem.h"
 #include "peripheral.h"
 
 struct u8_sim_ctx {

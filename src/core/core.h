@@ -1,5 +1,5 @@
-#ifndef U8_ARCH_H
-#define U8_ARCH_H
+#ifndef U8_CORE_H
+#define U8_CORE_H
 
 #include "../context.h"
 
