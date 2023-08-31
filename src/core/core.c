@@ -1,8 +1,8 @@
+#include <stdio.h>
+
 #include "core.h"
 #include "instr.h"
 #include "mem.h"
-
-#include <stdio.h>
 
 /* Execute one instruction */
 void u8_step(struct u8_core *core) {

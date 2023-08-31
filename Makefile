@@ -3,9 +3,8 @@ OBJDIR = obj
 OUTFILE = sim.out
 
 CC = gcc
-LD = ld
 
-CCFLAGS := -c -g
+CCFLAGS := -c -g -O3
 LDFLAGS := -lncurses
 
 SRC_C   := $(shell find ${SRCDIR} -name "*.c")

@@ -7,14 +7,14 @@
 struct u8_core;
 
 enum u8_mem_type {
-	U8_REGION_BOTH,
-	U8_REGION_DATA,
-	U8_REGION_CODE
+	U8_REGION_BOTH = 0,
+	U8_REGION_DATA = 1,
+	U8_REGION_CODE = 2
 };
 
 enum u8_mem_access {
-	U8_MACC_ARR,
-	U8_MACC_FUNC
+	U8_MACC_ARR  = 0,
+	U8_MACC_FUNC = 1
 };
 
 struct u8_mem_reg {
