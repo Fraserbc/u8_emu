@@ -134,9 +134,9 @@ int main(int argc, char **argv) {
 		fprintf(log_file, "\n");
 	
 
-		fflush(log_file);*/
+		fflush(log_file);
 
-		/*if (ctx->regs.csr == 0x01 && ctx->regs.pc == 0x8c64) {
+		if (ctx->regs.csr == 0x01 && ctx->regs.pc == 0x8c64) {
 			wprintw(ctx->periph.cons_win, "REG 0: ");
 			for (int x = 0; x < 0xB; x++) wprintw(ctx->periph.cons_win, "%02x ", read_mem_data(ctx, 0, 0x8000 + x, 1));
 			wprintw(ctx->periph.cons_win, "\nREG 1: ");
@@ -149,7 +149,7 @@ int main(int argc, char **argv) {
 			wprintw(ctx->periph.cons_win, "%04x %016lx %016lx %02x\n", ctx->regs.pc, read_reg_qr(ctx, 0), read_reg_qr(ctx, 8), ctx->regs.psw);
 			wrefresh(ctx->periph.cons_win);
 			//getch();
-		}*/
+		}
 
 		if (ctx->regs.csr == 0x01 && ctx->regs.pc == 0x83d6) {
 				wprintw(ctx->periph.cons_win, "\nNext digit (%x):", read_reg_r(ctx, 1));
@@ -186,7 +186,7 @@ int main(int argc, char **argv) {
 			wrefresh(ctx->periph.cons_win);
 		}
 
-		/*if (ctx->regs.csr == 0x00 && ctx->regs.pc == 0x2be4 && (read_reg_er(ctx, 2) == 0xffcc)) {
+		if (ctx->regs.csr == 0x00 && ctx->regs.pc == 0x2be4 && (read_reg_er(ctx, 2) == 0xffcc)) {
 				wprintw(ctx->periph.cons_win, "What??? %x%04x\n", ctx->regs.lcsr, ctx->regs.lr);
 				wrefresh(ctx->periph.cons_win);
 		}
@@ -199,19 +199,19 @@ int main(int argc, char **argv) {
 		if (ctx->regs.csr == 0x00 && ctx->regs.pc == 0x2c0a && ctx->regs.gp[2] == 0xd0) {
 				wprintw(ctx->periph.cons_win, "%04x\n", read_reg_er(ctx, 10));
 				wrefresh(ctx->periph.cons_win);
-		}*/
+		}
 
 		//if (ctx->regs.pc == 0x3c52) break;
 
-		/*if (count % 10000 == 0) {
+		if (count % 10000 == 0) {
 			for (int i = 0; i < 10; i++) wprintw(ctx->periph.cons_win, "%02x ", read_mem_data(ctx, 0, 0x8230 + i, 1));
 			wprintw(ctx->periph.cons_win, "\n");
 			wrefresh(ctx->periph.cons_win);
-		}*/
+		}
 
 		//if (ctx->regs.pc == 0xb3e0) ctx->regs.pc = 0xb41a;
 
-		/*if (ctx->regs.pc == 0xb404) {
+		if (ctx->regs.pc == 0xb404) {
 			wprintw(ctx->periph.cons_win, "Keycode: %02x\n", read_reg_r(ctx, 0));
 			wrefresh(ctx->periph.cons_win);
 		}*/
