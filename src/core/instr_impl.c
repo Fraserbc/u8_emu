@@ -6,7 +6,7 @@
 #include "instr.h"
 #include "mem.h"
 
-#define INSTR_NOT_IMPL(name) printf("ERR: '%s' not implemented @ %04x\n", name, core->regs.pc); exit(0)
+#define INSTR_NOT_IMPL(name) printf("ERR: '%s' not implemented @ %04x\n", name, core->regs.pc)
 
 // Common psw update routines
 void psw_set_zs(struct u8_core *core, uint8_t size, uint64_t val) {
