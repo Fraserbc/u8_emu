@@ -137,9 +137,8 @@ int main(int argc, char **argv) {
 	// Initialise peripherals
 	init_periph(ctx);
 
-	// Set PC and SP
-	ctx->core.regs.sp = read_mem_data(&ctx->core, 0, 0x0000, 2);
-	ctx->core.regs.pc = read_mem_data(&ctx->core, 0, 0x0002, 2);
+	// Reset the core
+	u8_reset(&ctx->core);
 
 	// Open the log file
 	FILE *log_file = fopen("sim.log", "w");

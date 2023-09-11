@@ -12,6 +12,7 @@ struct u8_core {
 	struct u8_mem mem;
 };
 
+void u8_reset(struct u8_core *core);
 void u8_step(struct u8_core *core);
 uint16_t u8_fetch(struct u8_core *core);
 

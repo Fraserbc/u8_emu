@@ -608,7 +608,19 @@ void instr_swi(struct u8_core *core, uint8_t flags, struct u8_oper *op0, struct 
 }
 
 void instr_brk(struct u8_core *core, uint8_t flags, struct u8_oper *op0, struct u8_oper *op1) {
-	INSTR_NOT_IMPL("BRK");
+	uint8_t elevel = core->regs.psw & 3;
+
+	if (elevel <= 1) {
+		core->regs.elr[2] = core->regs.pc;
+		core->regs.ecsr[2] = core->regs.csr;
+		core->regs.epsw[2] = core->regs.psw;
+		core->regs.psw &= 0b11111100;
+		core->regs.psw |= 0b00000010;
+		core->regs.pc = read_mem_data(core, 0, 0x0004, 2);
+		core->regs.csr = 0x00;
+	} else {
+		u8_reset(core);
+	}
 }
 
 // Branch Instructions

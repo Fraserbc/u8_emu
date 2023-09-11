@@ -1,8 +1,19 @@
 #include <stdio.h>
+#include <string.h>
 
 #include "core.h"
 #include "instr.h"
 #include "mem.h"
+
+void u8_reset(struct u8_core *core) {
+	// Set all registers to 0
+	memset(&core->regs, 0, sizeof(struct u8_regs));
+	core->cur_dsr = 0;
+
+	// Set SP and PC
+	core->regs.sp = read_mem_data(core, 0, 0x0000, 2);
+	core->regs.pc = read_mem_data(core, 0, 0x0002, 2);
+}
 
 /* Execute one instruction */
 void u8_step(struct u8_core *core) {
