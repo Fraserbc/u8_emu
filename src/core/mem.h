@@ -20,8 +20,8 @@ enum u8_mem_access {
 struct u8_mem_reg {
 	enum u8_mem_type type;
 	bool rw;
-	uint32_t addr_m;
-	uint32_t addr_v;
+	uint32_t addr_l;
+	uint32_t addr_h;
 
 	enum u8_mem_access acc;
 	union {

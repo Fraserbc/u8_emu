@@ -60,16 +60,22 @@ int main(int argc, char **argv) {
 
 	// Setup memory regions
 	ctx->data_mem = malloc(0x8000);
-	memset(ctx->data_mem, 0, 0x8000);
+	memset(ctx->data_mem, 0, 0xE00);
 
-	ctx->core.mem.num_regions = 5;
-	ctx->core.mem.regions = malloc(sizeof(struct u8_mem_reg) * 5);
+	uint8_t *emu_kb = malloc(0x30);
+	memset(emu_kb, 0, 0x30);
+
+	uint8_t *sfr = malloc(0x1000);
+	memset(sfr, 0, 0x1000);
+
+	ctx->core.mem.num_regions = 7;
+	ctx->core.mem.regions = malloc(sizeof(struct u8_mem_reg) * 7);
 
 	ctx->core.mem.regions[0] = (struct u8_mem_reg){
 		.type = U8_REGION_BOTH,
 		.rw = false,
-		.addr_m = 0xF8000,
-		.addr_v = 0x00000,
+		.addr_l = 0x00000,
+		.addr_h = 0x07FFF,
 		.acc = U8_MACC_ARR,
 		.array = ctx->code_mem
 	};
@@ -77,35 +83,53 @@ int main(int argc, char **argv) {
 	ctx->core.mem.regions[1] = (struct u8_mem_reg){
 		.type = U8_REGION_DATA,
 		.rw = true,
-		.addr_m = 0xF8000,
-		.addr_v = 0x08000,
+		.addr_l = 0x08000,
+		.addr_h = 0x08E00,
 		.acc = U8_MACC_ARR,
 		.array = ctx->data_mem
 	};
 
 	ctx->core.mem.regions[2] = (struct u8_mem_reg){
+		.type = U8_REGION_DATA,
+		.rw = true,
+		.addr_l = 0x08E00,
+		.addr_h = 0x08E30,
+		.acc = U8_MACC_ARR,
+		.array = emu_kb
+	};
+
+	ctx->core.mem.regions[3] = (struct u8_mem_reg){
+		.type = U8_REGION_DATA,
+		.rw = true,
+		.addr_l = 0x0F000,
+		.addr_h = 0x0FFFF,
+		.acc = U8_MACC_ARR,
+		.array = sfr
+	};
+
+	ctx->core.mem.regions[4] = (struct u8_mem_reg){
 		.type = U8_REGION_CODE,
 		.rw = false,
-		.addr_m = 0xF8000,
-		.addr_v = 0x08000,
+		.addr_l = 0x08000,
+		.addr_h = 0x0FFFF,
 		.acc = U8_MACC_ARR,
 		.array = (uint8_t *)(ctx->code_mem + 0x8000)
 	};
 
-	ctx->core.mem.regions[3] = (struct u8_mem_reg){
+	ctx->core.mem.regions[5] = (struct u8_mem_reg){
 		.type = U8_REGION_BOTH,
 		.rw = false,
-		.addr_m = 0xF0000,
-		.addr_v = 0x10000,
+		.addr_l = 0x10000,
+		.addr_h = 0x1FFFF,
 		.acc = U8_MACC_ARR,
 		.array = (uint8_t *)(ctx->code_mem + 0x10000)
 	};
 
-	ctx->core.mem.regions[4] = (struct u8_mem_reg){
+	ctx->core.mem.regions[6] = (struct u8_mem_reg){
 		.type = U8_REGION_DATA,
 		.rw = false,
-		.addr_m = 0xF0000,
-		.addr_v = 0x80000,
+		.addr_l = 0x80000,
+		.addr_h = 0x8FFFF,
 		.acc = U8_MACC_ARR,
 		.array = ctx->code_mem
 	};

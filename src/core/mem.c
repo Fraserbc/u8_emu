@@ -9,12 +9,15 @@ uint64_t access_mem(struct u8_core *core, uint8_t seg, uint16_t offset, uint8_t 
 	uint32_t addr = ((uint32_t)seg << 16) | offset;
 	for (int i = 0; i < core->mem.num_regions; i++) {
 		// Is the address in the current region?
-		if ((addr & core->mem.regions[i].addr_m) == core->mem.regions[i].addr_v &&
+		uint32_t addr_l = core->mem.regions[i].addr_l;
+		uint32_t addr_h = core->mem.regions[i].addr_h;
+
+		if (addr >= addr_l && addr <= addr_h &&
 		   (core->mem.regions[i].type == type || core->mem.regions[i].type == U8_REGION_BOTH)) {
 
 			if (rw && !core->mem.regions[i].rw) return 0;
 
-			addr &= 0xFFFFF ^ core->mem.regions[i].addr_m;
+			addr -= addr_l;
 
 			// Read each byte in little endian order
 			if (!rw) val = 0;
