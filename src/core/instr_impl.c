@@ -296,8 +296,9 @@ void instr_xor(struct u8_core *core, uint8_t flags, struct u8_oper *op0, struct 
 
 // DSR Prefix Instruction
 void instr_dsr(struct u8_core *core, uint8_t flags, struct u8_oper *op0, struct u8_oper *op1) {
-	core->cur_dsr = oper_read(core, op0);
-
+	core->regs.dsr = oper_read(core, op0);
+	core->cur_dsr = core->regs.dsr;
+	
 	u8_step(core);
 
 	core->cur_dsr = 0;
