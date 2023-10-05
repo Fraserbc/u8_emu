@@ -17,6 +17,7 @@
 *       3: EPSW
 *       4: SP
 *       5: CSR
+*       6: DSR
 *     MEM: 0xSDER
 *       S: as binary ISSS
 *         I: Increment EA?
@@ -80,7 +81,7 @@ static struct u8_instr u8_instr_table[] = {
 	// DSR Prefix Instructions
 	{&instr_dsr,		0xe300,	0x00,	{0x00ff, 0,  0x0000, &oper_imm},		{.handler = NULL}},						// Use #imm8
 	{&instr_dsr,		0x900f,	0x00,	{0x00f0, 4,  0x0001, &oper_reg_gp},		{.handler = NULL}},						// Use Rn
-	{&instr_dsr,		0xfe9f,	0x00,	{.handler = NULL},						{.handler = NULL}},						// Use DSR register
+	{&instr_dsr,		0xfe9f,	0x00,	{0x0000, 0,  0x0006, &oper_reg_ctrl},						{.handler = NULL}},						// Use DSR register
 
 	// Load/Store Instructions
 	{&instr_load,		0x9032,	0x00,	{0x0e00, 8,  0x0002, &oper_reg_gp},		{0x0000, 0,  0x1001, &oper_mem}},		// L	ERn,	[EA]
@@ -284,6 +285,7 @@ uint64_t oper_read(struct u8_core *core, struct u8_oper *oper) {
 			case 3: return core->regs.epsw[core->regs.psw & 3];
 			case 4: return core->regs.sp;
 			case 5: return core->regs.csr;
+			case 6: return core->regs.dsr;
 		}
 
 		case OPER_MEM: return read_mem_data(core, core->cur_dsr, oper->addr, oper->size);
