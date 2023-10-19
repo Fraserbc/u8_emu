@@ -100,24 +100,6 @@ void instr_add(struct u8_core *core, uint8_t flags, struct u8_oper *op0, struct 
 	oper_write(core, op0, res);
 }
 
-/*void instr_addc(struct u8_core *core, uint8_t flags, struct u8_oper *op0, struct u8_oper *op1) {
-	uint64_t mask = (1 << 8 * op0->size) - 1;
-
-	uint64_t val0 = oper_read(core, op0) & mask;
-	uint64_t val1 = oper_read(core, op1) & mask;
-
-	bool carry = core->regs.psw >> 7;
-
-	uint8_t psw_new;
-	uint64_t res = add_impl(val0, val1 + carry, op0->size, &psw_new);
-
-	// Set the new flags
-	core->regs.psw &= (psw_new | 0b10111111) & 0b01001011;
-	core->regs.psw |= psw_new & 0b10111111;
-
-	oper_write(core, op0, res);
-}*/
-
 void instr_addc(struct u8_core *core, uint8_t flags, struct u8_oper *op0, struct u8_oper *op1) {
 	uint64_t mask = (1 << 8 * op0->size) - 1;
 
@@ -131,7 +113,7 @@ void instr_addc(struct u8_core *core, uint8_t flags, struct u8_oper *op0, struct
 	res = add_impl(val0, val1, op0->size, &psw0);
 	res = add_impl(res, carry, op0->size, &psw1);
 
-	uint8_t psw_new = (psw0 & 0b10111111) | (psw1 & 0b10111111) | (psw1 & 0b01000000);
+	uint8_t psw_new = (psw0 & 0b10111111) | (psw1 & 0b11111111);
 
 	// Set the new flags
 	core->regs.psw &= (psw_new | 0b10111111) & 0b01001011;
@@ -160,10 +142,14 @@ void instr_cmpc(struct u8_core *core, uint8_t flags, struct u8_oper *op0, struct
 	bool carry = core->regs.psw >> 7;
 
 	uint64_t val0 = oper_read(core, op0) & mask;
-	uint64_t val1 = (oper_read(core, op1) + carry) & mask;
+	uint64_t val1 = oper_read(core, op1) & mask;
 
-	uint8_t psw_new;
-	sub_impl(val0, val1, op0->size, &psw_new);
+	uint64_t res;
+	uint8_t psw0, psw1;
+	res = sub_impl(val0, val1, op0->size, &psw0);
+	res = sub_impl(res, carry, op0->size, &psw1);
+
+	uint8_t psw_new = (psw0 & 0b10111111) | (psw1 & 0b11111111);
 
 	// Set the new flags
 	core->regs.psw &= (psw_new | 0b10111111) & 0b01001011;
@@ -194,8 +180,12 @@ void instr_subc(struct u8_core *core, uint8_t flags, struct u8_oper *op0, struct
 
 	bool carry = core->regs.psw >> 7;
 
-	uint8_t psw_new;
-	uint64_t res = sub_impl(val0, val1 + carry, op0->size, &psw_new);
+	uint64_t res;
+	uint8_t psw0, psw1;
+	res = sub_impl(val0, val1, op0->size, &psw0);
+	res = sub_impl(res, carry, op0->size, &psw1);
+
+	uint8_t psw_new = (psw0 & 0b10111111) | (psw1 & 0b11111111);
 
 	core->regs.psw &= (psw_new | 0b10111111) & 0b01001011;
 	core->regs.psw |= psw_new & 0b10111111;
