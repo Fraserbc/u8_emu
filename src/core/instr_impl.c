@@ -17,7 +17,7 @@ void psw_set_zs(struct u8_core *core, uint8_t size, uint64_t val) {
 	uint8_t s_bit = size * 8 - 1;	// Sign bit
 
 	psw |= (val == 0) << 6;		// Zero
-	psw |= (val >> s_bit) << 5;	// Sign
+	psw |= (val >> s_bit & 1) << 5;	// Sign
 
 	// Set the new flags
 	core->regs.psw = psw;
