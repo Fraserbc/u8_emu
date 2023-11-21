@@ -650,13 +650,13 @@ void instr_div(struct u8_core *core, uint8_t flags, struct u8_oper *op0, struct 
 
 	core->regs.psw &= 0b00111111;
 
-	uint64_t res = val0 / val1;
+	uint64_t res = val1 ? val0 / val1 : 0;
 
 	if (val1 == 0) core->regs.psw |= 0b10000000;
 	if (res == 0) core->regs.psw |= 0b01000000;
 
 	oper_write(core, op0, res);
-	oper_write(core, op1, val0 % val1);
+	oper_write(core, op1, val1 ? val0 % val1 : 0);
 }
 
 // Miscellaneous Instructions
