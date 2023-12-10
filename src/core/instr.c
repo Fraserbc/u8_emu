@@ -268,7 +268,7 @@ struct u8_oper oper_mem(struct u8_core *core, struct u8_instr_oper *oper, uint32
 struct u8_oper oper_imm(struct u8_core *core, struct u8_instr_oper *oper, uint32_t val) {
 	// Do we need sign extension?
 	if (oper->flags != 0 && (val >> oper->flags) & 1) {
-		val |= (-1) << oper->flags;
+		val |= 0xffffffffU << oper->flags;
 	}
 
 	return (struct u8_oper){.type=OPER_IMM, .size=0, .imm=val};

@@ -219,7 +219,7 @@ void instr_shift(struct u8_core *core, uint8_t flags, struct u8_oper *op0, struc
 
 	// Apply shift
 	if (flags & 1) {
-		psw |= ((val >> (shift - 1)) & 1) << 7;
+		if (shift) psw |= ((val >> (shift - 1)) & 1) << 7;
 		val >>= shift;
 	} else {
 		psw |= ((val >> (op0->size * 8 - shift)) & 1) << 7;
