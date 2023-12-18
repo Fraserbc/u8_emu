@@ -24,7 +24,7 @@ void u8_step(struct u8_core *core) {
 	struct u8_instr *instr = u8_decode(instr_word);
 
 	if (instr == NULL) {
-		printf("ERR: Invalid instruction %04x\n", instr_word);
+		printf("ERROR: Invalid instruction %04X @ %X:%04XH\n", instr_word, core->regs.csr, core->regs.pc);
 		return;
 	}
 

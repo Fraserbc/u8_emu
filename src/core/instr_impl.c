@@ -6,7 +6,7 @@
 #include "instr.h"
 #include "mem.h"
 
-#define INSTR_NOT_IMPL(name) printf("ERR: '%s' not implemented @ %04x\n", name, core->regs.pc)
+#define INSTR_NOT_IMPL(name) printf("ERROR: %s not implemented @ %X:%04XH\n", name, core->regs.csr, core->regs.pc)
 
 // Common psw update routines
 void psw_set_zs(struct u8_core *core, uint8_t size, uint64_t val) {
@@ -595,16 +595,23 @@ void instr_extbw(struct u8_core *core, uint8_t flags, struct u8_oper *op0, struc
 
 // Software Interrupt Instructions
 void instr_swi(struct u8_core *core, uint8_t flags, struct u8_oper *op0, struct u8_oper *op1) {
-	INSTR_NOT_IMPL("SWI");
+	core->regs.epsw[0] = core->regs.psw;
+	core->regs.psw &= 0b11111100;
+	core->regs.psw |= 0b00000001;
+	core->regs.elr[0] = core->regs.pc + 2;
+	core->regs.ecsr[0] = core->regs.csr;
+	core->regs.psw &= 0b11110111;
+	core->regs.pc = read_mem_data(core, 0, 0x0080 + 2*op0->imm, 2);
+	core->regs.csr = 0x00;
 }
 
 void instr_brk(struct u8_core *core, uint8_t flags, struct u8_oper *op0, struct u8_oper *op1) {
 	uint8_t elevel = core->regs.psw & 3;
 
 	if (elevel <= 1) {
-		core->regs.elr[2] = core->regs.pc;
-		core->regs.ecsr[2] = core->regs.csr;
-		core->regs.epsw[2] = core->regs.psw;
+		core->regs.elr[1] = core->regs.pc;
+		core->regs.ecsr[1] = core->regs.csr;
+		core->regs.epsw[1] = core->regs.psw;
 		core->regs.psw &= 0b11111100;
 		core->regs.psw |= 0b00000010;
 		core->regs.pc = read_mem_data(core, 0, 0x0004, 2);
