@@ -17,6 +17,9 @@ void u8_reset(struct u8_core *core) {
 
 /* Execute one instruction */
 void u8_step(struct u8_core *core) {
+	// Disable last SWI
+	core->last_swi = 0xff;
+	
 	// Fetch the next instruction
 	uint16_t instr_word = u8_fetch(core);
 
