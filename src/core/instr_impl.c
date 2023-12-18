@@ -313,7 +313,7 @@ void instr_push(struct u8_core *core, uint8_t flags, struct u8_oper *op0, struct
 	write_mem_data(core, core->cur_dsr, core->regs.sp, op0->size, oper_read(core, op0));
 }
 
-void get_ecsr(struct u8_core *core) {
+uint8_t get_ecsr(struct u8_core *core) {
 	uint8_t elevel = core->regs.psw & 3;
 	switch (elevel) {
 		case 0: return core->regs.csr;
@@ -321,14 +321,14 @@ void get_ecsr(struct u8_core *core) {
 	}
 }
 
-void get_elr(struct u8_core *core) {
+uint16_t get_elr(struct u8_core *core) {
 	uint8_t elevel = core->regs.psw & 3;
 	switch (elevel) {
 		case 0: return core->regs.lr;
 		default: return core->regs.elr[elevel - 1];
 	}
 }
-void get_epsw(struct u8_core *core) {
+uint8_t get_epsw(struct u8_core *core) {
 	uint8_t elevel = core->regs.psw & 3;
 	switch (elevel) {
 		case 0: return core->regs.psw;
