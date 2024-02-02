@@ -16,6 +16,7 @@ static uint64_t access_mem(struct u8_core *core, uint8_t seg, uint16_t offset, u
 
 		if (addr >= addr_l && addr <= addr_h && (core->mem.regions[i].type <= U8_REGION_DATA)) {
 			if (rw && !core->mem.regions[i].rw) return 0;
+			core->mem.regions[i].dirtybloom = 1;
 
 			addr -= addr_l;
 
