@@ -25,7 +25,10 @@ struct u8_mem_reg {
 
 	enum u8_mem_access acc;
 	union {
-		uint8_t *array;
+		struct {
+			uint8_t *array;
+			uint64_t dirtybloom;
+		};
 		struct {
 			uint8_t (*read)(struct u8_core *, uint8_t, uint16_t);
 			void (*write)(struct u8_core *, uint8_t, uint16_t, uint8_t);
@@ -42,6 +45,5 @@ uint64_t read_mem_data(struct u8_core *core, uint8_t dsr, uint16_t offset, uint8
 void write_mem_data(struct u8_core *core, uint8_t dsr, uint16_t offset, uint8_t size, uint64_t val);
 
 uint64_t read_mem_code(struct u8_core *core, uint8_t csr, uint16_t offset, uint8_t size);
-void write_mem_code(struct u8_core *core, uint8_t csr, uint16_t offset, uint8_t size, uint64_t val);
 
 #endif

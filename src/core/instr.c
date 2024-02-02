@@ -205,15 +205,45 @@ static struct u8_instr u8_instr_table[] = {
 
 #define NUM_INSTRS sizeof(u8_instr_table)/sizeof(struct u8_instr)
 
-struct u8_instr *u8_decode(uint16_t instr) {
+static uint16_t andbits[NUM_INSTRS], eqbits[NUM_INSTRS];
+static int did_init = 0;
+static int segmin[16];
+
+void u8_init() {
+	for (int x = 0; x < 16; x++) segmin[x] = NUM_INSTRS;
+	for (int x = 0; x < NUM_INSTRS; x++) {
+		struct u8_instr best = u8_instr_table[x];
+		for (int y = x + 1; y < NUM_INSTRS; y++) {
+			if (u8_instr_table[y].mask < best.mask) {
+				struct u8_instr newbest = u8_instr_table[y];
+				u8_instr_table[y] = best;
+				best = newbest;
+			}
+		}
+		u8_instr_table[x] = best;
+	}
 	for (int x = 0; x < NUM_INSTRS; x++) {
 		// Generate the mask
 		uint16_t mask = 0;
 		if (u8_instr_table[x].op0.handler != NULL) mask |= u8_instr_table[x].op0.mask; 
 		if (u8_instr_table[x].op1.handler != NULL) mask |= u8_instr_table[x].op1.mask;
 		mask ^= 0xffff;
-
-		if ((instr & mask) == u8_instr_table[x].mask) return &u8_instr_table[x];
+		andbits[x] = mask;
+		eqbits[x] = u8_instr_table[x].mask;
+		for (int y = 0; y < 16; y++) {
+			if ((y & (mask >> 12)) == u8_instr_table[x].mask >> 12) {
+				if (x < segmin[y]) segmin[y] = x;
+			}
+		}
+	}
+	did_init = 1;
+}
+struct u8_instr *u8_decode(uint16_t instr) {
+	if (!did_init) u8_init();
+	for (int x = segmin[instr >> 12]; x < NUM_INSTRS; x++) {
+		if ((instr & andbits[x]) == eqbits[x]) {
+			return &u8_instr_table[x];
+		}
 	}
 
 	return NULL;

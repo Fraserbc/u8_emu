@@ -9,8 +9,9 @@
 struct u8_core {
 	struct u8_regs regs;
 	uint8_t cur_dsr;
-	struct u8_mem mem;
 	uint8_t last_swi;
+	struct u8_mem mem;
+	struct u8_mem codemem;
 };
 
 void u8_reset(struct u8_core *core);
