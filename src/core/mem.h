@@ -27,7 +27,7 @@ struct u8_mem_reg {
 	union {
 		struct {
 			uint8_t *array;
-			uint64_t dirtybloom;
+			uint64_t dirty;
 		};
 		struct {
 			uint8_t (*read)(struct u8_core *, uint8_t, uint16_t);

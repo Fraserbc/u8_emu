@@ -16,7 +16,6 @@ static uint64_t access_mem(struct u8_core *core, uint8_t seg, uint16_t offset, u
 
 		if (addr >= addr_l && addr <= addr_h && (core->mem.regions[i].type <= U8_REGION_DATA)) {
 			if (rw && !core->mem.regions[i].rw) return 0;
-			core->mem.regions[i].dirtybloom = 1;
 
 			addr -= addr_l;
 
@@ -25,6 +24,7 @@ static uint64_t access_mem(struct u8_core *core, uint8_t seg, uint16_t offset, u
 			if (__builtin_expect(core->mem.regions[i].acc == U8_MACC_ARR, 1)) {
 #if defined (__LITTLE_ENDIAN__) || defined (__x86_64__) || defined (__i686__) || defined (__aarch64__)
 				if (__builtin_expect(rw, 0)) {
+				core->mem.regions[i].dirty &= 2;
 					memcpy(&core->mem.regions[i].array[addr], &val, size);
 				} else {
 					if (__builtin_expect(size == 1, 1)) {
